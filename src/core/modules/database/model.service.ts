@@ -25,7 +25,7 @@ export abstract class ModelService extends DataService {
       await this.doAfterRead(job);
       console.log();
 
-      return { data: "model service read" };
+      return job.response;
     } catch (error) {
       return { error };
     }

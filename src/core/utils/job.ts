@@ -1,3 +1,16 @@
+export interface JobOptions {
+  search?: string;
+  where?: any;
+  select?: string[];
+  attributes?: any;
+  populate?: string | any[];
+  include?: any[];
+  sort?: any;
+  group?: any;
+  having?: any;
+  offset?: number;
+  limit?: number;
+}
 export interface JobResponse {
   error?: any;
   data?: any;
@@ -11,24 +24,23 @@ export interface JobResponse {
 
 export class Job {
   id?: number | string;
+  uid?: string;
+  action?: string;
   payload?: any;
-  inputSketch?: any;
-  outputSketch?: any;
-  body?:{ [key:string]: any};
+  body?: { [key: string]: any };
+  options?: JobOptions;
   response?: JobResponse | any;
-  model?: any;
-  status: 'Pending' | "Completed" | "Errored";
+  status: "Pending" | "Completed" | "Errored";
 
-
-  constructor(job:any) {
+  constructor(job: any) {
     job = job || {};
     this.id = job.id || null;
+    this.uid = job.uid || null;
+    this.action = job.actions || null;
     this.payload = job.paylaod || {};
-    this.inputSketch = job.inputSketch || {};
-    this.outputSketch = job.outputSketch || {};
     this.body = job.body || {};
-    this.model = job.model || {};
+    this.options = job.options || {};
     this.response = job.response || {};
-    this.status = job.status || "Pending"
+    this.status = job.status || "Pending";
   }
 }
