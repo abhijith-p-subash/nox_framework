@@ -1,11 +1,24 @@
 import { Job, JobResponse } from "../../utils/job";
 
-export abstract class DataService {
-  //   constructor(parameters) {}
+export class DataService {
+  constructor(private readonly model: any) {}
 
   async createRecord(job: Job): Promise<JobResponse> {
     job.id;
-    const data = await job.model.create(job.body);
-    return { data: "done" };
+    console.log("?????????????????JOB");
+    console.log(job);
+    console.log("?????????????????JOB");
+    
+    
+    const data = await this.model.create(job.body);
+    return { data: data};
+  }
+
+  async getAllRecords(job: Job): Promise<JobResponse> {
+    console.log(job);
+    const data = await this.model.findAll();
+    console.log(data);
+
+    return { data: "Get all" };
   }
 }

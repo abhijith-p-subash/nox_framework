@@ -15,7 +15,7 @@ export class Job {
   inputSketch?: any;
   outputSketch?: any;
   body?:{ [key:string]: any};
-  response?: JobResponse;
+  response?: JobResponse | any;
   model?: any;
   status: 'Pending' | "Completed" | "Errored";
 
