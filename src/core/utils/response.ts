@@ -1,92 +1,94 @@
-import { Request, Response } from "express";
+import HttpStatus from "http-status-codes";
+import { Response } from "express";
+import * as moment from "moment-timezone";
 
-export function generic404(req: Request, res: Response) {
-  return res.status(404).json({ message: "Not Found" });
+/* 
+  ResponseData
+  Add additional info to response data
+ */
+const ResponseData = (data = {}) => ({ ...data });
+
+/**
+ * 200 - Http ok response
+ * @params {object} res - response object
+ * @params {object} data - response data
+ * @returns {object} http ok response
+ */
+export function Result(res: Response, data?: any) {
+  return res.status(HttpStatus.OK).json(ResponseData(data));
 }
 
-export function result(
-  res: Response,
-  data = { message: "Ok", data: {} },
-  statusCode = 200
-) {
-  return res.status(statusCode).json(data);
+/**
+ * 201 - Http created response
+ * @params {object} res - response object
+ * @params {object} data - response data
+ * @returns {object} http created response
+ */
+export function Created(res: Response, data?: any) {
+  return res.status(HttpStatus.CREATED).json(data);
 }
 
-export function accepted(
+/**
+ * 400 - Http bad request response
+ * @params {object} res - response object
+ * @params {object} data - response error data
+ * @returns {object} http error response
+ */
+export function BadRequest(
   res: Response,
-  data = { message: "Accepted", data: {} }
+  data = { error: {}, message: "Error" }
 ) {
-  data.message = "Accepted";
-  return res.status(202).json(data);
+  return res.status(HttpStatus.BAD_REQUEST).json(data);
 }
 
-export function created(
+/**
+ * 401 - Http unauthorized response
+ * @params {object} res - response object
+ * @params {object} data - response error data
+ * @returns {object} http error response
+ */
+export function Unauthorized(
   res: Response,
-  data = { message: "Accepted", data: {} }
+  data = { error: {}, message: "Error" }
 ) {
-  return res.status(201).json(data);
+  return res.status(HttpStatus.UNAUTHORIZED).json(data);
 }
 
-export function error(
+/**
+ * 403 - Http forbidden response
+ * @params {object} res - response object
+ * @params {object} data - response error data
+ * @returns {object} http error response
+ */
+export function Forbidden(
   res: Response,
-  data = { message: "Server Error", error: {} },
-  statusCode = 500
+  data = { error: {}, message: "Error" }
 ) {
-  return res.status(statusCode).json(data);
+  return res.status(HttpStatus.FORBIDDEN).json(data);
 }
 
-export function errorResponse(
+/**
+ * 404 - Http NotFound response
+ * @params {object} res - response object
+ * @params {object} data - response error data
+ * @returns {object} http NotFound response
+ */
+export function NotFound(
   res: Response,
-  data = { message: "Server Error", error: {} },
-  statusCode = 500
+  data = { error: {}, message: "Not Found" }
 ) {
-  return res.status(statusCode).json(data);
+  return res.status(HttpStatus.NOT_FOUND).json(data);
 }
 
-export function notFound(
+/**
+ * 500 - Http error response
+ * @params {object} res - response object
+ * @params {object} data - response error data
+ * @returns {object} http error response
+ */
+export function ErrorResponse(
   res: Response,
-  data = { message: "Not Found", error: {} },
-  statusCode = 404
+  data = { error: {}, message: "Error" }
 ) {
-  return res.status(statusCode).json(data).end();
-}
-
-export function unauthorized(
-  res: Response,
-  data = { message: "Unauthorized", error: {} },
-  statusCode = 401
-) {
-  return res.status(statusCode).json(data);
-}
-
-export function forbidden(
-  res: Response,
-  data = { message: "Forbidden", error: {} },
-  statusCode = 403
-) {
-  return res.status(statusCode).json(data);
-}
-
-export function badRequest(
-  res: Response,
-  data = { message: "Bad Request", error: {} },
-  statusCode = 400
-) {
-  return res.status(statusCode).json(data);
-}
-
-export function unsupportedAction(
-  res: Response,
-  data = { message: "Unsupported Action", error: {} },
-  statusCode = 405
-) {
-  return res.status(statusCode).json(data);
-}
-
-export function invalid(
-  res: Response,
-  data = { message: "Unprocessable Entity", error: {} },
-  statusCode = 422
-) {
-  return res.status(statusCode).json(data);
+  return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json(data);
 }

@@ -23,8 +23,6 @@ export abstract class ModelService extends DataService {
       await this.doBeforeRead(job);
       job.response = await this.getAllRecords(job);
       await this.doAfterRead(job);
-      console.log();
-
       return job.response;
     } catch (error) {
       return { error };
@@ -33,15 +31,9 @@ export abstract class ModelService extends DataService {
 
   async create(job: Job): Promise<JobResponse> {
     try {
-      console.log("//////////////JJOB");
-      console.log(job);
-      console.log("//////////////////JJBB");
-      
-      
-      
       await this.doBeforeWrite(job);
-      const data = this.createRecord(job)
-      return { data: data };
+      job.response = this.createRecord(job);
+      return job.response;
     } catch (error) {
       return { error };
     }

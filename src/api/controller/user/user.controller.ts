@@ -1,40 +1,56 @@
+import { ValidationError } from "./../../../core/utils/errors";
 import { User } from "./../../../models/database/user.model";
 import { Request, Response } from "express";
 import { Job } from "../../../core/utils/job";
 import { UserService } from "./../../../services/user.service";
+import {
+  BadRequest,
+  Created,
+  ErrorResponse,
+  Result,
+} from "../../../core/utils/response";
 // import User from "../../../models/database/user.model";
 
 const userService = new UserService(User);
 
 export const getAll = async (req: Request, res: Response) => {
-  try {
-    const data = await userService.findAll(new Job({}));
+  const { data, count, limit, offset, error } = await userService.findAll(
+    new Job({
+      action: "findAll",
+      options: { limit: 10, offset: 0 },
+    })
+  );
 
-    return res.send({ data: "WELCOME", test: data });
-  } catch (error) {
-    return res.status(400).send(error);
-    console.error(error);
+  if (!!error) {
+    return ErrorResponse(res, { error, message: `${error.message || error}` });
   }
+  return Result(res, {
+    data: { user: data, count, limit: limit, offset: offset },
+    message: "Ok",
+  });
 };
 
 export const create = async (req: Request, res: Response) => {
-  try {
-    console.log("???????????????????CONTROLLER req");
-    console.log(req.body);
-    console.log("???????????????????CONTROLLER req");
-    
-    const data = await userService.create(
-      new Job({
-        body: {
-          ...req.body
-        },
-      })
-    );
+  const { data, error } = await userService.create(
+    new Job({
+      action: "create",
+      body: {
+        ...req.body,
+      },
+    })
+  );
 
-    return res.status(201).send({ data: "data", msg: "OK" });
-  } catch (error) {
-    console.error(error);
-    return res.status(400).send(error);
+  if (!!error) {
+    if (error instanceof ValidationError) {
+      return BadRequest(res, {
+        error,
+        message: error.message,
+      });
+    }
+    return ErrorResponse(res, {
+      error,
+      message: `${error.message || error}`,
+    });
   }
+  return Created(res, { data: { user: data }, message: "Created" });
 };
-
