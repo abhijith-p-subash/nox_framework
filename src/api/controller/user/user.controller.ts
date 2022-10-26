@@ -1,3 +1,4 @@
+import { queryValidation } from "./../../../core/utils/validation";
 import { ValidationError } from "./../../../core/utils/errors";
 import { User } from "./../../../models/database/user.model";
 import { Request, Response } from "express";
@@ -17,7 +18,9 @@ export const getAll = async (req: Request, res: Response) => {
   const { data, count, limit, offset, error } = await userService.findAll(
     new Job({
       action: "findAll",
-      options: { limit: 10, offset: 0 },
+      options: {
+        ...queryValidation(req.query),
+      },
     })
   );
 
@@ -25,7 +28,7 @@ export const getAll = async (req: Request, res: Response) => {
     return ErrorResponse(res, { error, message: `${error.message || error}` });
   }
   return Result(res, {
-    data: { user: data, count, limit: limit, offset: offset },
+    data: { user: data, count, limit, offset },
     message: "Ok",
   });
 };
