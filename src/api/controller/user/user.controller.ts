@@ -10,11 +10,11 @@ import {
   ErrorResponse,
   Result,
 } from "../../../core/utils/response";
-// import User from "../../../models/database/user.model";
 
 const userService = new UserService(User);
 
 export const getAll = async (req: Request, res: Response) => {
+  queryValidation(req.query);
   const { data, count, limit, offset, error } = await userService.findAll(
     new Job({
       action: "findAll",
