@@ -1,7 +1,9 @@
+import { Request, Response } from "express";
+import { v4 as uuidv4 } from 'uuid';
+
 import { queryValidation } from "./../../../core/utils/validation";
 import { ValidationError } from "./../../../core/utils/errors";
 import { User } from "./../../../models/database/user.model";
-import { Request, Response } from "express";
 import { Job } from "../../../core/utils/job";
 import { UserService } from "./../../../services/user.service";
 import {
@@ -24,7 +26,7 @@ export const getAll = async (req: Request, res: Response) => {
     })
   );
 
-  if (!!error) {
+  if (!!error) { 
     return ErrorResponse(res, { error, message: `${error.message || error}` });
   }
   return Result(res, {
@@ -34,10 +36,14 @@ export const getAll = async (req: Request, res: Response) => {
 };
 
 export const create = async (req: Request, res: Response) => {
+  console.log(req.body);
+  console.log(uuidv4());
+  
   const { data, error } = await userService.create(
     new Job({
       action: "create",
       body: {
+        uid: uuidv4(), 
         ...req.body,
       },
     })

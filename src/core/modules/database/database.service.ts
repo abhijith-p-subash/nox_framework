@@ -1,3 +1,4 @@
+import { NotFoundError } from "../../utils/errors";
 import { Job, JobResponse } from "../../utils/job";
 
 export class DataService {
@@ -5,6 +6,8 @@ export class DataService {
 
   async createRecord(job: Job): Promise<JobResponse> {
     try {
+      console.log(job);
+
       const data = await this.model.create(job.body);
 
       return { data: data };
@@ -39,6 +42,102 @@ export class DataService {
         having,
       });
       return { data: data.rows, offset, limit, count: data.count };
+    } catch (error) {
+      return { error };
+    }
+  }
+
+  async findRecordById(job: Job): Promise<JobResponse> {
+    try {
+      if (!job.id) return { error: "Error Calling FindById: id is missing" };
+
+      const where = job.options?.where || undefined;
+      const attributes = job.options?.attributes || undefined;
+      const include = job.options?.include || undefined;
+      const data = await this.model.findOne({
+        where: { ...where },
+        attributes,
+        include,
+      });
+      if (data === null) throw new NotFoundError("Record not found");
+      return { data };
+    } catch (error) {
+      return { error };
+    }
+  }
+
+  async findOneRecord(job: Job): Promise<JobResponse> {
+    try {
+      if (!job.options?.where)
+        return {
+          error: "Error Calling findOneRecord: options.where is missing",
+        };
+
+      const where = job.options.where || undefined;
+      const attributes = job.options.attributes || undefined;
+      const include = job.options.include || undefined;
+      const order = job.options.sort || undefined;
+      const group = job.options.group || undefined;
+      const having = job.options.having || undefined;
+      const data = await this.model.findOne({
+        where,
+        attributes,
+        include,
+        order,
+        group,
+        having,
+      });
+      if (data === null) throw new NotFoundError("Record not Found");
+      return { data };
+    } catch (error) {
+      return { error };
+    }
+  }
+
+  async findAndUpdateRecord(job: Job): Promise<JobResponse> {
+    try {
+      if (!job.options?.where)
+        return {
+          error: "Error calling findAndUpdateRecord: options.where is missing",
+        };
+      if (!job.body)
+        return {
+          error: "Error calling findAndUpdateRecord: options.body is missing",
+        };
+
+      const where = job.options.where || undefined;
+      const fields = job.options.fields || undefined;
+      const data = await this.model.findOne({
+        where,
+      });
+      if (data === null) throw new NotFoundError("Record not found");
+      const previousData = JSON.parse(JSON.stringify(data));
+      for (const prop in job.body) {
+        data[prop] = job.body[prop];
+      }
+      await data.save({ fields });
+      return { data, previousData };
+    } catch (error) {
+      return { error };
+    }
+  }
+
+  async deleteRecord(job: Job): Promise<JobResponse> {
+    try {
+      if (!job.id)
+        return { error: "Error calling deleteRecord: id is missing" };
+      const where = job.options?.where;
+      const data = await this.model.findOne({
+        where: { ...where, id: job.id },
+      });
+      if (data === null) throw new NotFoundError("Record not found");
+      if (!!job.owner && !!job.owner.id) {
+        data.updated_by = job.owner.id;
+      }
+      await this.model.destroy({
+        force: !!job.options?.hardDelete,
+      });
+      return { data };
     } catch (error) {
       return { error };
     }

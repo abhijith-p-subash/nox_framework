@@ -7,9 +7,12 @@ export interface JobOptions {
   include?: any[];
   sort?: any;
   group?: any;
+  fields?: string[];
   having?: any;
   offset?: number;
   limit?: number;
+  allowEmpty?: boolean;
+  hardDelete?: boolean;
 }
 export interface JobResponse {
   error?: any;
@@ -25,6 +28,7 @@ export interface JobResponse {
 export class Job {
   id?: number | string;
   uid?: string;
+  owner?: any;
   action?: string;
   payload?: any;
   body?: { [key: string]: any };
