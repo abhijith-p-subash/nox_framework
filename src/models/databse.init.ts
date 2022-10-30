@@ -1,4 +1,5 @@
 require("dotenv").config;
+import { User } from "./database/user.model";
 
 // import User from "./database/user.model";
 
@@ -10,3 +11,5 @@ require("dotenv").config;
 // ]);
 
 // export default dbInit;
+
+export const DB = [User]

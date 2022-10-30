@@ -25,7 +25,6 @@ export const getAll = async (req: Request, res: Response) => {
       },
     })
   );
-
   if (!!error) { 
     return ErrorResponse(res, { error, message: `${error.message || error}` });
   }

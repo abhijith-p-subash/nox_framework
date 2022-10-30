@@ -6,11 +6,51 @@ export class DataService {
 
   async createRecord(job: Job): Promise<JobResponse> {
     try {
-      console.log(job);
+      if (!job.body)
+        return { error: "Error calling reateRecord: bidy is missing" };
+      const fields = job.options?.fields || undefined;
+      const include = job.options?.include || undefined;
+      const data = await this.model.create(job.body, {
+        fields,
+        include,
+      });
+      if (!!include) {
+        const dataWithInclude = await this.model.findByPk(data.id, {
+          include,
+        });
+        return { data: dataWithInclude };
+      }
+      return { data };
+    } catch (error) {
+      return { error };
+    }
+  }
 
-      const data = await this.model.create(job.body);
-
-      return { data: data };
+  async updateRecord(job: Job): Promise<JobResponse> {
+    try {
+      if (!job.id)
+        return { error: "Error calling updateRecord: id is missing" };
+      if (!job.body)
+        return { error: "Error calling updateRecord: body is missing" };
+      const where = job.options?.where || undefined;
+      const data = await this.model.findOne({
+        where: { ...where, id: job.id },
+      });
+      if (data === null) throw new NotFoundError("Record not found");
+      const previousData = JSON.parse(JSON.stringify(data));
+      for (const prop in job.body) {
+        data[prop] = job.body[prop];
+      }
+      const fields = job.options?.fields || undefined;
+      const include = job.options?.include || undefined;
+      await data.save({ fields });
+      if (!!include) {
+        const dataWithInclude = await this.model.findByPk(data.id, {
+          include,
+        });
+        return { data: dataWithInclude, previousData };
+      }
+      return { data, previousData };
     } catch (error) {
       return { error };
     }
@@ -42,6 +82,24 @@ export class DataService {
         having,
       });
       return { data: data.rows, offset, limit, count: data.count };
+    } catch (error) {
+      return { error };
+    }
+  }
+
+  async countAllRecords(job: Job): Promise<JobResponse> {
+    try {
+      const where = job.options?.where || undefined;
+      const attributes = job.options?.attributes || undefined;
+      const include = job.options?.include || undefined;
+      const distinct = job.options?.distinct || undefined;
+      const data = await this.model.count({
+        where,
+        attributes,
+        include,
+        distinct,
+      });
+      return { count: data };
     } catch (error) {
       return { error };
     }

@@ -6,7 +6,8 @@ import {
   Length,
   BeforeCreate,
 } from "sequelize-typescript";
-import { v4 as uuidv4 } from 'uuid';
+import sequlizeConnection from "../../config/database";
+import { generateHash, uuid } from "../../core/utils/helpers";
 
 @Table({
   timestamps: true,
@@ -82,6 +83,24 @@ export class User extends Model {
   google_id!: string;
 
   @Column({
+    type: DataType.STRING || DataType.NUMBER,
+    allowNull: true,
+  })
+  created_by!: any;
+
+  @Column({
+    type: DataType.STRING || DataType.NUMBER,
+    allowNull: true,
+  })
+  updated_by!: any;
+
+  @Column({
+    type: DataType.STRING || DataType.NUMBER,
+    allowNull: true,
+  })
+  deleted_by!: any;
+
+  @Column({
     type: DataType.DATE,
     allowNull: true,
   })
@@ -94,11 +113,20 @@ export class User extends Model {
 
   @BeforeCreate
   static createUID(instance: User) {
-    instance.uid = uuidv4();
+    instance.uid = uuid();
   }
 
   @BeforeCreate
   static createFullName(instance: User) {
-    instance.full_name = `${instance.first_name} ${instance.last_name}`;
+    if (!!instance.first_name && !!instance.last_name)
+      instance.full_name = `${instance.first_name} ${instance.last_name}`;
+  }
+
+  @BeforeCreate
+  static async encryptPassword(instance: User) {
+    if(!!instance.password)
+      instance.password = await generateHash(instance.password)
   }
 }
+
+sequlizeConnection.addModels([User]);

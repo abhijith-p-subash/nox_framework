@@ -8,6 +8,7 @@ export interface JobOptions {
   sort?: any;
   group?: any;
   fields?: string[];
+  distinct?:boolean;
   having?: any;
   offset?: number;
   limit?: number;
