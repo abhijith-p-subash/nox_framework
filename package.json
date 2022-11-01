@@ -20,6 +20,8 @@
     "http-status-codes": "^2.2.0",
     "mariadb": "^3.0.1",
     "moment-timezone": "^0.5.38",
+    "mongodb": "^4.11.0",
+    "mongoose": "^6.7.0",
     "mysql2": "^2.3.3",
     "reflect-metadata": "^0.1.13",
     "sequelize": "^6.25.3",
@@ -28,6 +30,8 @@
   },
   "devDependencies": {
     "@types/express": "^4.17.14",
+    "@types/mongodb": "^4.0.7",
+    "@types/mongoose": "^5.11.97",
     "@types/node": "^18.11.4",
     "@types/validator": "^13.7.9",
     "concurrently": "^7.4.0",

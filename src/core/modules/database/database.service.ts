@@ -108,12 +108,11 @@ export class DataService {
   async findRecordById(job: Job): Promise<JobResponse> {
     try {
       if (!job.id) return { error: "Error Calling FindById: id is missing" };
-
       const where = job.options?.where || undefined;
       const attributes = job.options?.attributes || undefined;
       const include = job.options?.include || undefined;
       const data = await this.model.findOne({
-        where: { ...where },
+        where: { ...where, id: job.id },
         attributes,
         include,
       });
@@ -126,6 +125,8 @@ export class DataService {
 
   async findOneRecord(job: Job): Promise<JobResponse> {
     try {
+      console.log(job);
+      
       if (!job.options?.where)
         return {
           error: "Error Calling findOneRecord: options.where is missing",
@@ -192,8 +193,9 @@ export class DataService {
       if (!!job.owner && !!job.owner.id) {
         data.updated_by = job.owner.id;
       }
-      await this.model.destroy({
+      await data.destroy({
         force: !!job.options?.hardDelete,
+      
       });
       return { data };
     } catch (error) {

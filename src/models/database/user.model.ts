@@ -17,42 +17,48 @@ export class User extends Model {
   @Column({
     type: DataType.STRING,
     allowNull: false,
-    unique: true,
+    unique: true
   })
   uid!: string;
 
   @Column({
     type: DataType.STRING,
+    comment: 'Tony',
     allowNull: false,
   })
   first_name!: string;
 
   @Column({
     type: DataType.STRING,
+    comment: 'Stark',
     allowNull: false,
   })
   last_name!: string;
 
   @Column({
     type: DataType.STRING,
+    comment: 'Tony Stark',
     allowNull: true,
   })
   full_name!: string;
 
   @Column({
     type: DataType.STRING,
+    comment: 'tony.stark@admin.com',
     allowNull: false,
   })
   email!: string;
 
   @Column({
     type: DataType.STRING,
+    comment: '112233',
     allowNull: true,
   })
   phone_code!: string;
 
   @Column({
     type: DataType.STRING,
+    comment: '9988774455',
     allowNull: false,
   })
   phone!: string;
@@ -60,6 +66,7 @@ export class User extends Model {
   @Length({ min: 6 })
   @Column({
     type: DataType.STRING,
+    comment: '123456',
     allowNull: false,
   })
   password!: string;

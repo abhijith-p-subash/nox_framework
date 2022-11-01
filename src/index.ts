@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import routes from "./api/routes";
 
 import sequelizeConnection from "./config/database";
+import mongoConnection from "./config/mongo";
 
 dotenv.config();
 
@@ -18,13 +19,16 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use("/api", routes);
 
+
 app.get("/", (req: Request, res: Response) => {
   res.send("Express + TypeScript Server😊😊😊");
 });
 
+
 const start = async (): Promise<void> => {
   try {
     await sequelizeConnection.sync();
+    await mongoConnection()
     app.listen(port, () => {
       console.log(
         `⚡️[server]: Server is running at https://localhost:${port}`

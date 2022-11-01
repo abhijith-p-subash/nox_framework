@@ -12,4 +12,4 @@ export const queryValidation = (data: any): Promise<void> => {
   // if (data.having) query.having?: any;
   return query; 
 };
-    
+        
