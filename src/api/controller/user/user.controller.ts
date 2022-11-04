@@ -13,6 +13,9 @@ import {
   NotFound,
   Result,
 } from "../../../core/utils/response";
+import { LoginLogModel } from "../../../models/mongo/login-log.model";
+
+
 
 const userService = new UserService(User);
 
@@ -115,7 +118,7 @@ export const update = async (req: Request, res: Response) => {
     new Job({
       action: "update",
       id: +req.params.id,
-      body: req.body
+      body: req.body,
     })
   );
   if (!!error) {

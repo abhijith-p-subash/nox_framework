@@ -7,7 +7,7 @@ export class DataService {
   async createRecord(job: Job): Promise<JobResponse> {
     try {
       if (!job.body)
-        return { error: "Error calling reateRecord: bidy is missing" };
+        return { error: "Error calling reateRecord: body is missing" };
       const fields = job.options?.fields || undefined;
       const include = job.options?.include || undefined;
       const data = await this.model.create(job.body, {

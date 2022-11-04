@@ -1,4 +1,3 @@
-
 export const queryValidation = (data: any): Promise<void> => {
   let query: any = {};
   if (data.where) query.where = JSON.parse(data.where);
@@ -8,8 +7,21 @@ export const queryValidation = (data: any): Promise<void> => {
   if (data.sort) query.sort = [data.sort] || [];
   if (data.populate) query.populate = data.populate || [];
   if (data.include) query.include = data.include || [];
+  if (data.hardDelete) query.hardDelete = isStringBoolean(data.hardDelete);
   // if (data.group query.group?: any;
   // if (data.having) query.having?: any;
-  return query; 
+  return query;
 };
-        
+
+export const isEmptyObject = (obj: any) => {
+  for (let key in obj) {
+    if (obj[key]) return false;
+  }
+  return true;
+};
+
+
+export const isStringBoolean = (val: string | boolean) => {
+  if (val === 'true') return true;
+  if (val === 'false') return false;
+}
