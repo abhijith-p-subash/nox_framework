@@ -1,4 +1,4 @@
-import { isEmptyObject } from './../../utils/validation';
+import { isEmptyObject } from "./../../utils/validation";
 import { NotFoundError } from "../../utils/errors";
 import { Job, JobResponse } from "../../utils/job";
 
@@ -80,15 +80,13 @@ export class MongoService {
 
   async countAllRecords(job: Job): Promise<JobResponse> {
     try {
-      const where = job.options?.where || undefined;
-      const attributes = job.options?.attributes || undefined;
-      const include = job.options?.include || undefined;
-      const distinct = job.options?.distinct || undefined;
-      const data = await this.model.count({
-        where,
-        attributes,
-        include,
-        distinct,
+      const where = job.options?.where || {};
+
+      if (!job.options?.withDeleted) {
+        where.deleted_at = null;
+      }
+      const data = await this.model.countDocuments({
+        where
       });
       return { count: data };
     } catch (error) {
@@ -99,15 +97,21 @@ export class MongoService {
   async findRecordById(job: Job): Promise<JobResponse> {
     try {
       if (!job.id) return { error: "Error Calling FindById: id is missing" };
-      const where = job.options?.where || undefined;
-      const attributes = job.options?.attributes || undefined;
-      const include = job.options?.include || undefined;
-      const data = await this.model.findOne({
-        where: { ...where, id: job.id },
-        attributes,
-        include,
-      });
-      if (data === null) throw new NotFoundError("Record not found");
+      const where = job.options?.where || {};
+      const projection = job.options?.attributes || undefined;
+      const populate: any = job.options?.populate || "";
+      if (!job.options?.withDeleted) {
+        where.deleted_at = null;
+      }
+      const data = await this.model.findOne(
+        { ...where, _id: job.id },
+        projection,
+        {
+          populate,
+        }
+      );
+      if (data === null && !job.options?.allowEmpty)
+        throw new NotFoundError("Record not found");
       return { data };
     } catch (error) {
       return { error };
@@ -122,22 +126,21 @@ export class MongoService {
         return {
           error: "Error Calling findOneRecord: options.where is missing",
         };
-
+      const offset = job.options.offset ? +job.options.offset : 0;
       const where = job.options.where || undefined;
-      const attributes = job.options.attributes || undefined;
-      const include = job.options.include || undefined;
-      const order = job.options.sort || undefined;
-      const group = job.options.group || undefined;
-      const having = job.options.having || undefined;
-      const data = await this.model.findOne({
-        where,
-        attributes,
-        include,
-        order,
-        group,
-        having,
+      const projection = job.options.attributes || undefined;
+      const populate: any = job.options.populate || "";
+      const sort = job.options.sort || [];
+      if (!job.options.withDeleted) {
+        where.deleted_at = null;
+      }
+      const data = await this.model.findOne(where, projection, {
+        populate,
+        skip: offset,
+        sort,
       });
-      if (data === null) throw new NotFoundError("Record not Found");
+      if (data === null && !job.options.allowEmpty)
+        throw new NotFoundError("Record not Found");
       return { data };
     } catch (error) {
       return { error };
@@ -157,6 +160,9 @@ export class MongoService {
 
       const where = job.options.where || undefined;
       const fields = job.options.fields || undefined;
+      if (!job.options?.withDeleted) {
+        where.deleted_at = null;
+      }
       const data = await this.model.findOne({
         where,
       });
@@ -174,10 +180,6 @@ export class MongoService {
 
   async deleteRecord(job: Job): Promise<JobResponse> {
     try {
-      console.log("INthe delete");
-      console.log(job);
-      
-      
       if (!job.id)
         return { error: "Error calling deleteRecord: id is missing" };
       const where = job.options?.where || {};

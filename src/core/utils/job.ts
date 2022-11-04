@@ -14,6 +14,7 @@ export interface JobOptions {
   limit?: number;
   allowEmpty?: boolean;
   hardDelete?: boolean;
+  withDeleted?: boolean;
 }
 export interface JobResponse {
   error?: any;

@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   create,
   getAll,
+  getCount,
   getById,
   getOne,
   update,
@@ -12,6 +13,7 @@ const userRouter = Router();
 
 userRouter.post("/", create);
 userRouter.get("/", getAll);
+userRouter.get("/count", getCount);
 userRouter.get("/find", getOne);
 userRouter.get("/:id", getById);
 userRouter.put("/:id", update);

@@ -59,6 +59,75 @@ export const getAll = async (req: Request, res: Response) => {
     });
   };
 
+  export const getCount = async (req: Request, res: Response) => {
+    queryValidation(req.query);
+    const { data, count, limit, offset, error } = await loginLogService.getCount(
+      new Job({
+        action: "getCount",
+        options: {
+          ...queryValidation(req.query),
+        },
+      })
+    );
+    if (!!error) {
+      return ErrorResponse(res, { error, message: `${error.message || error}` });
+    }
+    return Result(res, {
+      data: { user: data, count, limit, offset },
+      message: "Ok",
+    });
+  };
+
+  export const getById = async (req: Request, res: Response) => {
+    const { data, error } = await loginLogService.findById(
+      new Job({
+        action: "findById",
+        id: req.params.id,
+        options: {
+          ...queryValidation(req.query),
+        },
+      })
+    );
+    if (!!error) {
+      if (error instanceof NotFoundError) {
+        return NotFound(res, {
+          error,
+          message: `Record Not found`,
+        });
+      }
+      return ErrorResponse(res, { error, message: `${error.message || error}` });
+    }
+    return Result(res, {
+      data: { user: data },
+      message: "Ok",
+    });
+  };
+
+  export const getOne = async (req: Request, res: Response) => {
+    const { data, error } = await loginLogService.findOne(
+      new Job({
+        action: "findOne",
+        options: {
+          ...queryValidation(req.query),
+        },
+      })
+    );
+    if (!!error) {
+      if (error instanceof NotFoundError) {
+        return NotFound(res, {
+          error,
+          message: `Record Not found`,
+        });
+      }
+      return ErrorResponse(res, { error, message: `${error.message || error}` });
+    }
+    return Result(res, {
+      data: { user: data },
+      message: "Ok",
+    });
+  };
+  
+
 
   export const update = async (req: Request, res: Response) => {
     const { data, error } = await loginLogService.update(
