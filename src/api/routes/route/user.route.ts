@@ -1,22 +1,18 @@
-import { Router } from "express";
+import { Router, Request, Response } from "express";
 import {
-  create,
-  getAll,
-  getCount,
-  getById,
-  getOne,
-  update,
-  deleteOne,
+  UserController
 } from "../../controller/user/user.controller";
 
 const userRouter = Router();
+const userController = new UserController();
 
-userRouter.post("/", create);
-userRouter.get("/", getAll);
-userRouter.get("/count", getCount);
-userRouter.get("/find", getOne);
-userRouter.get("/:id", getById);
-userRouter.put("/:id", update);
-userRouter.delete("/:id", deleteOne);
+userRouter.post("/", userController.create);
+userRouter.get("/", userController.getAll);
+userRouter.get("/count", userController.getCount);
+userRouter.get("/find", userController.getOne);
+userRouter.get("/:id", userController.getById);
+userRouter.put("/:id", userController.update);
+userRouter.delete("/:id", userController.deleteOne);
+
 
 export default userRouter;

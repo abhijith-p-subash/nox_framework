@@ -1,22 +1,16 @@
-import { Router } from "express";
-import {
-  create,
-  getAll,
-  getCount,
-  getById,
-  getOne,
-  update,
-  deleteOne,
-} from "../../controller/login-log/login-log.controller";
+import { Router, Request, Response } from "express";
+import { LoginLogController } from "../../controller/login-log/login-log.controller";
 
 const loginLogRouter = Router();
+const loginLogController = new LoginLogController();
 
-loginLogRouter.post("/", create);
-loginLogRouter.get("/", getAll);
-loginLogRouter.get("/count", getCount);
-loginLogRouter.get("/find", getOne);
-loginLogRouter.get("/:id", getById);
-loginLogRouter.put("/:id", update);
-loginLogRouter.delete("/:id", deleteOne);
+loginLogRouter.post("/", loginLogController.create);
+loginLogRouter.get("/", loginLogController.getAll);
+loginLogRouter.get("/count", loginLogController.getCount);
+loginLogRouter.get("/find", loginLogController.getOne);
+loginLogRouter.get("/:id", loginLogController.getById);
+loginLogRouter.put("/:id", loginLogController.update);
+loginLogRouter.delete("/:id", loginLogController.deleteOne);
+
 
 export default loginLogRouter;

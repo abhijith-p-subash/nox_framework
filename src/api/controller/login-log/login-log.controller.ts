@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
+import { Body, Get, Route, Controller } from "tsoa";
 import { ValidationError } from "sequelize";
 import { NotFoundError } from "../../../core/utils/errors";
-import { Job } from "../../../core/utils/job";
+import { Job, JobResponse } from "../../../core/utils/job";
 import {
   BadRequest,
   Created,
@@ -9,38 +10,48 @@ import {
   NotFound,
   Result,
 } from "../../../core/utils/response";
+// import { LoginLog, LoginLogGetAllResponse } from "./loginlog.type";
 import { queryValidation } from "../../../core/utils/validation";
-import { LoginLogModel  } from "../../../models/mongo/login-log.model";
+import { LoginLogModel, LoginLog } from "../../../models/mongo/login-log.model";
 import { LoginLogService } from "./../../../services/login-log.service";
+
 
 const loginLogService = new LoginLogService(LoginLogModel);
 
-export const create = async (req: Request, res: Response) => {
-  const { data, error } = await loginLogService.create(
-    new Job({
-      action: "create",
-      body: {
-        ...req.body,
-      },
-    })
-  );
 
-  if (!!error) {
-    if (error instanceof ValidationError) {
-      return BadRequest(res, {
+export class LoginLogController extends Controller {
+  /**
+   * Create loginLog
+   */
+  async create(req: Request, res: Response) {
+    const { data, error } = await loginLogService.create(
+      new Job({
+        action: "create",
+        body: {
+          ...req.body,
+        },
+      })
+    );
+
+    if (!!error) {
+      if (error instanceof ValidationError) {
+        return BadRequest(res, {
+          error,
+          message: error.message,
+        });
+      }
+      return ErrorResponse(res, {
         error,
-        message: error.message,
+        message: `${error.message || error}`,
       });
     }
-    return ErrorResponse(res, {
-      error,
-      message: `${error.message || error}`,
-    });
+    return Created(res, { data: { loginLog: data }, message: "Created" });
   }
-  return Created(res, { data: { user: data }, message: "Created" });
-};
 
-export const getAll = async (req: Request, res: Response) => {
+  /**
+   * Return all loginLogs list
+   */
+  async getAll(req: Request | any, res: Response): Promise<any> {
     queryValidation(req.query);
     const { data, count, limit, offset, error } = await loginLogService.findAll(
       new Job({
@@ -51,34 +62,47 @@ export const getAll = async (req: Request, res: Response) => {
       })
     );
     if (!!error) {
-      return ErrorResponse(res, { error, message: `${error.message || error}` });
+      return ErrorResponse(res, {
+        error,
+        message: `${error.message || error}`,
+      });
     }
     return Result(res, {
-      data: { user: data, count, limit, offset },
+      data: { loginLogs: data, count, limit, offset },
       message: "Ok",
     });
-  };
+  }
 
-  export const getCount = async (req: Request, res: Response) => {
+  /**
+   * Return loginLog Count
+   */
+  async getCount(req: Request, res: Response) {
     queryValidation(req.query);
-    const { data, count, limit, offset, error } = await loginLogService.getCount(
-      new Job({
-        action: "getCount",
-        options: {
-          ...queryValidation(req.query),
-        },
-      })
-    );
+    const { data, count, limit, offset, error } =
+      await loginLogService.getCount(
+        new Job({
+          action: "getCount",
+          options: {
+            ...queryValidation(req.query),
+          },
+        })
+      );
     if (!!error) {
-      return ErrorResponse(res, { error, message: `${error.message || error}` });
+      return ErrorResponse(res, {
+        error,
+        message: `${error.message || error}`,
+      });
     }
     return Result(res, {
-      data: { user: data, count, limit, offset },
+      data: { loginLog: data, count, limit, offset },
       message: "Ok",
     });
-  };
+  }
 
-  export const getById = async (req: Request, res: Response) => {
+  /**
+   * Return loginLogs By Id
+   */
+  async getById(req: Request, res: Response) {
     const { data, error } = await loginLogService.findById(
       new Job({
         action: "findById",
@@ -95,15 +119,21 @@ export const getAll = async (req: Request, res: Response) => {
           message: `Record Not found`,
         });
       }
-      return ErrorResponse(res, { error, message: `${error.message || error}` });
+      return ErrorResponse(res, {
+        error,
+        message: `${error.message || error}`,
+      });
     }
     return Result(res, {
-      data: { user: data },
+      data: { loginLog: data },
       message: "Ok",
     });
-  };
+  }
 
-  export const getOne = async (req: Request, res: Response) => {
+  /**
+   * Return loginLog with parameter
+   */
+  async getOne(req: Request, res: Response) {
     const { data, error } = await loginLogService.findOne(
       new Job({
         action: "findOne",
@@ -119,17 +149,21 @@ export const getAll = async (req: Request, res: Response) => {
           message: `Record Not found`,
         });
       }
-      return ErrorResponse(res, { error, message: `${error.message || error}` });
+      return ErrorResponse(res, {
+        error,
+        message: `${error.message || error}`,
+      });
     }
     return Result(res, {
-      data: { user: data },
+      data: { loginLog: data },
       message: "Ok",
     });
-  };
-  
+  }
 
-
-  export const update = async (req: Request, res: Response) => {
+  /**
+   * Update loginLog
+   */
+  async update(req: Request, res: Response) {
     const { data, error } = await loginLogService.update(
       new Job({
         action: "update",
@@ -144,16 +178,21 @@ export const getAll = async (req: Request, res: Response) => {
           message: `Record Not found`,
         });
       }
-      return ErrorResponse(res, { error, message: `${error.message || error}` });
+      return ErrorResponse(res, {
+        error,
+        message: `${error.message || error}`,
+      });
     }
     return Result(res, {
-      data: { user: data },
+      data: { loginLog: data },
       message: "Updated",
     });
-  };
-  
+  }
 
-  export const deleteOne = async (req: Request, res: Response) => {
+  /**
+   * Delete loginLog
+   */
+  async deleteOne(req: Request, res: Response) {
     const { data, error } = await loginLogService.delete(
       new Job({
         action: "delete",
@@ -170,10 +209,14 @@ export const getAll = async (req: Request, res: Response) => {
           message: `Record Not found`,
         });
       }
-      return ErrorResponse(res, { error, message: `${error.message || error}` });
+      return ErrorResponse(res, {
+        error,
+        message: `${error.message || error}`,
+      });
     }
     return Result(res, {
-      data: { user: data },
+      data: { loginLog: data },
       message: "Deleted",
     });
-  };
+  }
+}

@@ -1,6 +1,10 @@
 import express, { Express, Request, Response } from "express";
 import bodyParser from "body-parser";
 import dotenv from "dotenv";
+import morgan from "morgan";
+import swaggerUi from 'swagger-ui-express';
+const swaggerFile = require('../swagger_output.json')
+
 import routes from "./api/routes";
 
 import sequelizeConnection from "./config/database";
@@ -12,10 +16,22 @@ const app: Express = express();
 const port = process.env.PORT;
 
 app.use(express.json());
+app.use(morgan("tiny"));
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(express.static("public"));
 // app.use(bodyParser.json());
 
-app.use("/api", routes);
+app.use(routes);
+
+app.use(
+  "/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(undefined, {
+    swaggerOptions: {
+      url: "/swagger.json",
+    },
+  })
+);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Express + TypeScript Server😊😊😊");
