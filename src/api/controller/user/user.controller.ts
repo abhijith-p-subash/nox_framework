@@ -31,7 +31,7 @@ export class UserController {
           ...req.body,
         },
       })
-    );
+    ); 
 
     if (!!error) {
       if (error instanceof ValidationError) {
