@@ -1,8 +1,9 @@
 import { connect } from "mongoose";
 
+
 const mongoConnection = async () => {
   try {
-    const mongoURI: string = "mongodb://localhost:27017/nox";
+    const mongoURI: string = "mongodb://127.0.0.1:27017/nox";
     await connect(mongoURI);
     // console.log("MongoDB Connected...");
   } catch (error) {

@@ -17,48 +17,48 @@ export class User extends Model {
   @Column({
     type: DataType.STRING,
     allowNull: false,
-    unique: true
+    unique: true,
   })
   uid!: string;
 
   @Column({
     type: DataType.STRING,
-    comment: 'Tony',
+    comment: "Tony",
     allowNull: false,
   })
   first_name!: string;
 
   @Column({
     type: DataType.STRING,
-    comment: 'Stark',
+    comment: "Stark",
     allowNull: false,
   })
   last_name!: string;
 
   @Column({
     type: DataType.STRING,
-    comment: 'Tony Stark',
+    comment: "Tony Stark",
     allowNull: true,
   })
   full_name!: string;
 
   @Column({
     type: DataType.STRING,
-    comment: 'tony.stark@admin.com',
+    comment: "tony.stark@admin.com",
     allowNull: false,
   })
   email!: string;
 
   @Column({
     type: DataType.STRING,
-    comment: '112233',
+    comment: "112233",
     allowNull: true,
   })
   phone_code!: string;
 
   @Column({
     type: DataType.STRING,
-    comment: '9988774455',
+    comment: "9988774455",
     allowNull: false,
   })
   phone!: string;
@@ -66,7 +66,7 @@ export class User extends Model {
   @Length({ min: 6 })
   @Column({
     type: DataType.STRING,
-    comment: '123456',
+    comment: "123456",
     allowNull: false,
   })
   password!: string;
@@ -131,8 +131,8 @@ export class User extends Model {
 
   @BeforeCreate
   static async encryptPassword(instance: User) {
-    if(!!instance.password)
-      instance.password = await generateHash(instance.password)
+    if (!!instance.password)
+      instance.password = await generateHash(instance.password);
   }
 }
 
