@@ -1,5 +1,6 @@
 import { Router, Request, Response } from "express";
-import { LoginLogController } from "../../controller/login-log/login-log.controller";
+// import { LoginLogController } from "../../controller/login-log/login-log.controller";
+import { LoginLogController } from "../../modules/login-log/login-log.controller";
 
 const loginLogRouter = Router();
 const loginLogController = new LoginLogController();

@@ -12,8 +12,8 @@ import {
 } from "../../../core/utils/response";
 // import { LoginLog, LoginLogGetAllResponse } from "./loginlog.type";
 import { queryValidation } from "../../../core/utils/validation";
-import { LoginLogModel, LoginLog } from "../../../models/mongo/login-log.model";
-import { LoginLogService } from "./../../../services/login-log.service";
+import { LoginLogModel, LoginLog } from "./entity/login-log.model";
+import { LoginLogService } from "./login-log.service";
 
 
 const loginLogService = new LoginLogService(LoginLogModel);

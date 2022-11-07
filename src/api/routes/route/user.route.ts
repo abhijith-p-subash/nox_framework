@@ -1,7 +1,8 @@
 import { Router, Request, Response } from "express";
-import {
-  UserController
-} from "../../controller/user/user.controller";
+// import {
+//   UserController
+// } from "../../controller/user/user.controller";
+import { UserController } from "../../modules/user/user.controller";
 
 const userRouter = Router();
 const userController = new UserController();

@@ -6,8 +6,9 @@ import {
   Length,
   BeforeCreate,
 } from "sequelize-typescript";
-import sequlizeConnection from "../../config/database";
-import { generateHash, uuid } from "../../core/utils/helpers";
+import sequlizeConnection from "../../../../config/database";
+import { generateHash, uuid } from "../../../../core/utils/helpers";
+
 
 @Table({
   timestamps: true,
