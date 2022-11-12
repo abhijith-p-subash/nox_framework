@@ -23,6 +23,7 @@
   "dependencies": {
     "@typegoose/typegoose": "^9.12.1",
     "@types/bcrypt": "^5.0.0",
+    "@types/redis": "^4.0.11",
     "@types/uuid": "^8.3.4",
     "and": "^0.0.3",
     "bcrypt": "^5.1.0",
@@ -36,6 +37,7 @@
     "mongoose": "^6.7.1",
     "morgan": "^1.10.0",
     "mysql2": "^2.3.3",
+    "redis": "^4.5.0",
     "reflect-metadata": "^0.1.13",
     "sequelize": "^6.25.3",
     "sequelize-typescript": "^2.1.5",
