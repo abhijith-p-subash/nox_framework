@@ -31,7 +31,7 @@ export class Job {
   id?: number | string;
   uid?: string;
   owner?: any;
-  action?: string;
+  action: string;
   payload?: any;
   body?: { [key: string]: any };
   options?: JobOptions;

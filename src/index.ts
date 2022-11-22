@@ -3,6 +3,7 @@ import bodyParser from "body-parser";
 import dotenv from "dotenv";
 import morgan from "morgan";
 import swaggerUi from "swagger-ui-express";
+
 const swaggerFile = require("../swagger_output.json");
 
 import routes from "./api/routes";
@@ -42,12 +43,12 @@ const start = async (): Promise<void> => {
   try {
     await sequelizeConnection
       .sync()
-      .then(() => console.log("\x1b[32m","mySql Connected"));
+      .then(() => console.log("\x1b[32m", "mySql Connected"));
     await mongoConnection().then(() =>
-      console.log("\x1b[32m","MogoDB Connected")
+      console.log("\x1b[32m", "MogoDB Connected")
     );
     await redisClient.connect().then(() => {
-      console.log("\x1b[32m","Redis Client Connected");
+      console.log("\x1b[32m", "Redis Client Connected");
     });
     app.listen(port, () => {
       console.log(

@@ -15,6 +15,7 @@ import {
 } from "../../../core/utils/response";
 import { Get, Route, Post, Put, Delete } from "tsoa";
 
+
 const userService = new UserService(User);
 
 export class UserController {
@@ -51,7 +52,6 @@ export class UserController {
    * Return all Users list
    */
   async getAll(req: Request, res: Response) {
-    queryValidation(req.query);
     const { data, count, limit, offset, error } = await userService.findAll(
       new Job({
         action: "findAll",
