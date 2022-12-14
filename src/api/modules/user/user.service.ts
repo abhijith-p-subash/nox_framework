@@ -33,8 +33,8 @@ export class UserService extends ModelService {
     }
   }
 
-  async doAfterWrite(job: Job): Promise<void> {
-    await super.doAfterWrite(job);
-    job.response.data.password = undefined;
-  }
+  // async doAfterWrite(job: Job): Promise<void> {
+  //   await super.doAfterWrite(job);
+  //   job.response.data.password = undefined;
+  // }
 }

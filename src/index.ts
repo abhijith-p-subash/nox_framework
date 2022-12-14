@@ -1,8 +1,9 @@
 import express, { Express, Request, Response } from "express";
 import bodyParser from "body-parser";
-import dotenv from "dotenv";
+import * as dotenv from "dotenv";
 import morgan from "morgan";
 import swaggerUi from "swagger-ui-express";
+import cors from "cors";
 
 const swaggerFile = require("../swagger_output.json");
 
@@ -12,16 +13,21 @@ import sequelizeConnection from "./config/database";
 import mongoConnection from "./config/mongo";
 import redisClient from "./config/redis";
 
+
 dotenv.config();
 
 const app: Express = express();
 const port = process.env.PORT;
 
+app.use(cors());;
 app.use(express.json());
 app.use(morgan("tiny"));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static("public"));
-// app.use(bodyParser.json());
+
+
+
+
 
 app.use(routes);
 
