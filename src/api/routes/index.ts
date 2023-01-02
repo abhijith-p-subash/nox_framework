@@ -5,7 +5,7 @@ import userRouter from "./route/user.route";
 
 const routes = Router();
 
-routes.use("/user", userRouter);
+routes.use("/users", userRouter);
 routes.use("/login-logs", loginLogRouter);
 
 export default routes;
