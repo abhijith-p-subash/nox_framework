@@ -12,6 +12,10 @@ import routes from "./api/routes";
 import sequelizeConnection from "./config/database";
 import mongoConnection from "./config/mongo";
 import redisClient from "./config/redis";
+import passport from "passport";
+import { jwtAuth } from "./api/modules/auth/jwt/jwt.strategy";
+import { localAuth } from "./api/modules/auth/local/local.strategy";
+
 
 
 dotenv.config();
@@ -19,15 +23,16 @@ dotenv.config();
 const app: Express = express();
 const port = process.env.PORT;
 
-app.use(cors());;
+app.use(cors());
 app.use(express.json());
 app.use(morgan("tiny"));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static("public"));
 
-
-
-
+passport.use(jwtAuth);
+passport.use(localAuth)
+app.use(passport.initialize());
+//app.use(passport.session());
 
 app.use(routes);
 
