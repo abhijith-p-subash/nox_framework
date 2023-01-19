@@ -125,7 +125,7 @@ export class DataService {
 
   async findOneRecord(job: Job): Promise<JobResponse> {
     try {
-      console.log(job);
+
       
       if (!job.options?.where)
         return {

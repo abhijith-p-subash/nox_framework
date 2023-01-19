@@ -8,12 +8,8 @@ const jwtService = new JWTService();
 
 export class AuthController {
   async login(req: Request, res: Response) {
-    console.log(req.user);
     let user: { id: number } | any = req.user;
-
     const { data, error } = await authService.createUserSession(user?.id);
-    console.log("Login data", data);
-
     if (!!error) {
       return Unauthorized(res, {
         error,
@@ -24,7 +20,13 @@ export class AuthController {
   }
 
   async signup() {
-    return await jwtService.createToken(1, true);
+    return await jwtService.createToken(1);
+  }
+
+
+  async logout(req:Request, res:Response){
+    // req.logOut();
+    res.redirect('/');
   }
 
   async testSecurity(req: Request, res: Response) {

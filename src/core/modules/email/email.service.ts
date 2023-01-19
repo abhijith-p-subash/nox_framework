@@ -18,9 +18,8 @@ export class EmailService {
   });
 
   async sendMail(job:Job) {
-    console.log(job);
+
     
-    console.log( typeof process.env.EMAIL_USERNAME, process.env.EMAIL_PASSWORD);
 
     try {
       let info = await this.transporter.sendMail({

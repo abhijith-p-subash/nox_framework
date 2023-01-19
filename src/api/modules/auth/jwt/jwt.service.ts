@@ -1,15 +1,14 @@
 import jwt from "jsonwebtoken";
+import redisClient from "../../../../config/redis";
 // import dotenv from "dotenv";
 
 export class JWTService {
-  async createToken(userId: number | string, access_token: boolean) {
-    console.log(process.env.PROJECT_NAME);
+  async createToken(userId: number | string) {
     const payload = {
       userId: userId,
     };
-    const secretKey = access_token
-      ? process.env.ACCESS_TOKEN_SECRET
-      : process.env.REFRESH_TOKEN_SECRET;
+    const secretKey = process.env.ACCESS_TOKEN_SECRET;
+
     const options = {
       expiresIn: "1h",
       issuer: process.env.PROJECT_NAME,
@@ -19,6 +18,25 @@ export class JWTService {
 
   async verifyToken(token: string) {
     const decode = jwt.verify(token, `${process.env.JWT_SECRET}`);
+
+    console.log(decode);
+    
     return decode;
+  }
+
+  async createRefreshToken(userId: number | string) {
+    const payload = {
+      userId: userId,
+    };
+    const secretKey = process.env.REFRESH_TOKEN_SECRET;
+
+    const options = {
+      expiresIn: "1y",
+      issuer: process.env.PROJECT_NAME,
+    };
+    const refreshToken = jwt.sign(payload, `${secretKey}`, options);
+    await redisClient.SET(`${userId}`, refreshToken);
+    await redisClient.expire(`${userId} `, 31536000)
+    return refreshToken;
   }
 }

@@ -68,9 +68,7 @@ export class MongoService {
         }),
         this.model.countDocuments(where),
       ]);
-      console.log("MOGO SERVICE");
-
-      console.log(data);
+     
 
       return { data: data[0], offset, limit, count: data[1] };
     } catch (error) {
@@ -120,7 +118,6 @@ export class MongoService {
 
   async findOneRecord(job: Job): Promise<JobResponse> {
     try {
-      console.log(job);
 
       if (!job.options?.where)
         return {

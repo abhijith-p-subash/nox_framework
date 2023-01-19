@@ -15,9 +15,7 @@ const opts = {
 
 export const jwtAuth = new JwtStrategy(opts, async (jwt_payload, done) => {
   // find the user in the database based on the sub claim in the JWT
-console.log("JWT PAYLOAD");
 
-  console.log(jwt_payload);
   
   const { data, error } = await userService.findById(
     new Job({

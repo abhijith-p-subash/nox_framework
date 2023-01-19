@@ -91,6 +91,11 @@ export class User extends Model {
   google_id!: string;
 
   @Column({
+    type: DataType.BOOLEAN,
+    allowNull: false,
+  })
+  active!: true;
+  @Column({
     type: DataType.STRING || DataType.NUMBER,
     allowNull: true,
   })
