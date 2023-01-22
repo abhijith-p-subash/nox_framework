@@ -23,7 +23,7 @@ export class AuthService {
         if (!data.active) {
           return { error: "Account is inactive" };
         }
-        const token = await jwtService.createToken(userId);
+        const token = await jwtService.createToken(userId, '1h');
         const refreshToken = await jwtService.createRefreshToken(userId);
         return {
           error: false,

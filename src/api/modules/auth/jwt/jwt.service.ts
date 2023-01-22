@@ -3,14 +3,14 @@ import redisClient from "../../../../config/redis";
 // import dotenv from "dotenv";
 
 export class JWTService {
-  async createToken(userId: number | string) {
+  async createToken(userId: number | string, expireTime: string) {
     const payload = {
       userId: userId,
     };
     const secretKey = process.env.ACCESS_TOKEN_SECRET;
 
     const options = {
-      expiresIn: "1h",
+      expiresIn: expireTime,
       issuer: process.env.PROJECT_NAME,
     };
     return jwt.sign(payload, `${secretKey}`, options);
