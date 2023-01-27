@@ -1,11 +1,11 @@
 import nodemailer from "nodemailer";
 import { Job } from "../../utils/job";
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 
 dotenv.config();
 export class EmailService {
   transporter = nodemailer.createTransport({
-    host:"abhijithpsubash110@gmail.com",
+    host: process.env.EMAIL_HOST,
     port: 25,
     service: "gmail",
     secure: false,
@@ -17,24 +17,27 @@ export class EmailService {
     },
   });
 
-  async sendMail(job:Job) {
-
-    
-
+  async sendMail(job: Job) {
     try {
+      console.log(job);
+
       let info = await this.transporter.sendMail({
-        from: "abhijithpsubash110@gmail.com",
-        to: "abhijith.p.subash@gmail.com",
-        subject: "Email  Testing",
-        text: "Hello world",
-        html: "<h1> Hello World HTML 😡😊  </h1><br><h1>ok ENV</h1>",
+        from: process.env.EMAIL_HOST,
+        to: job.body?.toEmail,
+        subject: job.body?.subject,
+        html: job.body?.htmlBody,
       });
 
       console.log("Message sent: %s", info.messageId);
 
       console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+      return {
+        data: info,
+        message: "Email Send",
+      };
     } catch (error) {
       console.log("ERROR😡😡😡", error);
+      return { error };
     }
   }
 }

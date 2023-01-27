@@ -15,6 +15,9 @@ authRouter.post(
   authController.login
 );
 
+authRouter.post("/send-verification-email/:id", authController.sendVerificationEmail);
+authRouter.get("/email-verification/:token", authController.emailVerification)
+
 authRouter.get(
   "/test-security",
   passport.authenticate("jwt", { session: false }),

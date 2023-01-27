@@ -8,7 +8,7 @@ export interface JobOptions {
   sort?: any;
   group?: any;
   fields?: string[];
-  distinct?:boolean;
+  distinct?: boolean;
   having?: any;
   offset?: number;
   limit?: number;
@@ -32,7 +32,7 @@ export class Job {
   uid?: string;
   owner?: any;
   action: string;
-  payload?: any;
+  payload?: { [key: string]: any };
   body?: { [key: string]: any };
   options?: JobOptions;
   response?: JobResponse | any;
