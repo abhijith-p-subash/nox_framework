@@ -1,22 +1,31 @@
 import { JwtPayload } from "jsonwebtoken";
 import { EmailService } from "../../../core/modules/email/email.service";
 import { Job } from "../../../core/utils/job";
+import { LoginLogModel } from "../login-log/entity/login-log.model";
+import { LoginLogService } from "../login-log/login-log.service";
 import { User } from "../user/entity/user.model";
 import { UserService } from "../user/user.service";
 import { JWTService } from "./jwt/jwt.service";
 
 const userService = new UserService(User);
+const loginLogService = new LoginLogService(LoginLogModel);
 const jwtService = new JWTService();
 const emailService = new EmailService();
 
 export class AuthService {
   async createSession() {}
 
-  async createUserSession(userId: number | string) {
+  async createUserSession(job:Job) {
+    console.log(">>>JOB");
+    
+    console.log(job);
+    
+    const id: { id: number } | any = job.id;
+    const jobBody = (job as { body: any }).body;
     const { data, error } = await userService.findById(
       new Job({
         action: "findById",
-        id: +userId,
+        id: +id,
       })
     );
     if (!!error) {
@@ -25,8 +34,19 @@ export class AuthService {
       if (!data.active) {
         return { error: "Account is inactive" };
       }
-      const token = await jwtService.createToken(userId, "1h");
-      const refreshToken = await jwtService.createRefreshToken(userId);
+      const token = await jwtService.createToken(id, "1h");
+      const refreshToken = await jwtService.createRefreshToken(id);
+
+      const loginLogs = await loginLogService.create(new Job({
+        action: "create",
+        body: {
+          name: jobBody.full_name,
+          user_id: +id
+        }
+      }))
+
+      if (loginLogs.error) return {error: true, message: "Failed to register Login Logs"}
+      
       return {
         error: false,
         data: { token, refreshToken, user: data },

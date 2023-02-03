@@ -15,7 +15,15 @@ const jwtService = new JWTService();
 export class AuthController {
   async login(req: Request, res: Response) {
     let user: { id: number } | any = req.user;
-    const { data, error } = await authService.createUserSession(user?.id);
+    console.log(req.body);
+    console.log(req.user);
+
+    const { data, error } = await authService.createUserSession(
+      new Job({
+        id: user.id,
+        body: req.user,
+      })
+    );
     if (!!error) {
       return Unauthorized(res, {
         error,
