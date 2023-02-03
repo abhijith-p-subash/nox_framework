@@ -1,3 +1,4 @@
+import { JwtPayload } from "jsonwebtoken";
 import { EmailService } from "../../../core/modules/email/email.service";
 import { Job } from "../../../core/utils/job";
 import { User } from "../user/entity/user.model";
@@ -62,9 +63,41 @@ export class AuthService {
       if (error) {
         return { error: error, status: 404, message: "Failed to send email" };
       }
-      return { data:{...data, verificationToken}, verificationToken, message };
+      return {
+        data: { ...data, verificationToken },
+        verificationToken,
+        message,
+      };
     } catch (error) {
       return { error: error, status: 404, message: "Failed to send email" };
+    }
+  }
+
+  async emailVerification(job: Job) {
+    try {
+      console.log(job);
+
+      let jwtPayLoad = await jwtService.verifyToken(
+        job.body?.token,
+        job.body?.otp
+      );
+      let tokenVerifi = jwtPayLoad as JwtPayload;
+      const { data, error } = await userService.update(
+        new Job({
+          action: "update",
+          id: tokenVerifi.userId,
+          body: {
+            active: true,
+          },
+        })
+      );
+
+      if (error) {
+        return error;
+      }
+      return { data };
+    } catch (error) {
+      return { error };
     }
   }
 }

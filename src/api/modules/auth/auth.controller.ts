@@ -14,8 +14,6 @@ const jwtService = new JWTService();
 
 export class AuthController {
   async login(req: Request, res: Response) {
-    console.log("HOST", req.headers.host);
-
     let user: { id: number } | any = req.user;
     const { data, error } = await authService.createUserSession(user?.id);
     if (!!error) {
@@ -26,7 +24,6 @@ export class AuthController {
     }
     return Result(res, { data, message: "Login success" });
   }
-
   async signup() {
     return await jwtService.createToken(1, "1h");
   }
@@ -43,8 +40,6 @@ export class AuthController {
     const { data, message, error } = await authService.sendVerificationEmail(
       job
     );
-    console.log("RSPONSE");
-    console.log(data);
     if (!!error) {
       return ErrorResponse(res, {
         error,
@@ -58,7 +53,26 @@ export class AuthController {
   }
 
   async emailVerification(req: Request, res: Response) {
-    res.send("GOT IT");
+    const { data, error } = await authService.emailVerification(
+      new Job({
+        action: "emailVerification",
+        body: {
+          token: req.params.token,
+          otp: req.query.otp,
+        },
+      })
+    );
+
+    if (!!error) {
+      return ErrorResponse(res, {
+        error,
+        message: `${error}` || "Failed to verify",
+      });
+    }
+    return Result(res, {
+      data: { verificationRes: data },
+      message: "User Verified",
+    });
   }
 
   async logout(req: Request, res: Response) {

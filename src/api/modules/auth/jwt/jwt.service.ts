@@ -13,11 +13,26 @@ export class JWTService {
       expiresIn: expireTime,
       issuer: process.env.PROJECT_NAME,
     };
+    console.log("CRETAE TOKEN");
+    console.log(key ?  `${secretKey}${key}` : `${secretKey}`);
+    
+    
     return jwt.sign(payload, key ?  `${secretKey}${key}` : `${secretKey}`, options);
   }
 
   async verifyToken(token: string, key?:string) {
-    const decode = jwt.verify(token, key ? `${process.env.JWT_SECRET}${key}`:`${process.env.JWT_SECRET}`);
+    console.log(token);
+    console.log(key);
+    console.log(process.env.ACCESS_TOKEN_SECRET);
+    console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
+    const test = key ? `${process.env.ACCESS_TOKEN_SECRET}${key}`:`${process.env.ACCESS_TOKEN_SECRET}`;
+    console.log(test);
+    
+    console.log('>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>');
+    
+    
+    
+    const decode = jwt.verify(token, key ? `${process.env.ACCESS_TOKEN_SECRET}${key}`:`${process.env.ACCESS_TOKEN_SECRET}`);
 
     console.log(decode);
 
