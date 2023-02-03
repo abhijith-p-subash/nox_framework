@@ -4,6 +4,7 @@ import * as dotenv from "dotenv";
 import morgan from "morgan";
 import swaggerUi from "swagger-ui-express";
 import cors from "cors";
+import helmet from "helmet";
 
 const swaggerFile = require("../swagger_output.json");
 
@@ -23,6 +24,7 @@ dotenv.config();
 const app: Express = express();
 const port = process.env.PORT;
 
+app.use(helmet());
 app.use(cors());
 app.use(express.json());
 app.use(morgan("tiny"));
