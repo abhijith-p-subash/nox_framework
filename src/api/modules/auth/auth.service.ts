@@ -75,8 +75,6 @@ export class AuthService {
 
   async emailVerification(job: Job) {
     try {
-      console.log(job);
-
       let jwtPayLoad = await jwtService.verifyToken(
         job.body?.token,
         job.body?.otp
