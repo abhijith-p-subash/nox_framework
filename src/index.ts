@@ -29,8 +29,8 @@ app.use(cors());
 app.use(express.json());
 app.use(morgan("tiny"));
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(express.static("public"));
-
+app.set('view engine', 'ejs');
+app.use(express.static('public'))
 passport.use(jwtAuth);
 passport.use(localAuth)
 app.use(passport.initialize());
@@ -49,7 +49,7 @@ app.use(
 );
 
 app.get("/", (req: Request, res: Response) => {
-  res.send("Express + TypeScript Server😊😊😊");
+  res.render('home', {message:"Welcome to NOX_Framework v0.1.1", version: process.env.VERSION});
 });
 
 const start = async (): Promise<void> => {
