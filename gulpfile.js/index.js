@@ -1,65 +1,49 @@
-const gulp = require("gulp");
-const fs = require("fs");
-// const { snakeCase } = require("../src/core/utils/helpers");
-// const rename = require("gulp-rename");
-// const replace = require("gulp-replace");
-// const prettier = require("gulp-prettier");
+const gulp = require('gulp');
+const rename = require('gulp-rename');
+const replace = require('gulp-replace');
+const prettier = require('gulp-prettier');
 
-function snakeCase(str) {
-  return str
-    .split(/(?=[A-Z])/)
-    .join("_")
-    .toLowerCase();
+const options = {};
+const argvs = process.argv.slice(3);
+
+for (let index = 0; index < argvs.length; index++) {
+  if (!argvs[index].startsWith('-')) continue;
+  const key = argvs[index].substring(1);
+  if (!argvs[index + 1] || argvs[index + 1].startsWith('-')) {
+    options[key] = true;
+  } else {
+    options[key] = argvs[index + 1];
+    index++;
+  }
 }
 
-const argv = 
+if (typeof options.module !== 'string') throw new Error('Module name not specified!');
 
-gulp.task("sql-module", async function () {
-  return new Promise((resolve, reject) => {
-    const fileName = process.argv[4];
-    fs.mkdirSync(`./src/api/modules/${fileName}`);
-    fs.mkdirSync(`./src/api/modules/${fileName}/entity`);
-    fs.mkdirSync(`./src/api/routes/route/${fileName}`);
+const lcText = options.module;
+const ucText = lcText.split('-').map(function capitalize(part) {
+  return part.charAt(0).toUpperCase() + part.slice(1);
+}).join('');
+const lcfucText = ucText.charAt(0).toLowerCase() + ucText.slice(1);
 
-    //   fs.writeFileSync(`./${fileName}.txt`, 'Hello World');
-
-    fs.writeFileSync(
-      `./src/api/modules/${fileName}/${fileName}.controller.ts`,
-      "test aj"
-    );
-    fs.writeFileSync(
-      `./src/api/modules/${fileName}/${fileName}.service.ts`,
-      "test aj"
-    );
-
-    fs.writeFileSync(
-      `./src/api/modules/${fileName}/entity/${fileName}.dto.ts`,
-      "test aj"
-    );
-    fs.writeFileSync(
-      `./src/api/modules/${fileName}/entity/${fileName}.model.ts`,
-      "test aj"
-    );
-    fs.writeFileSync(
-      `./src/api/modules/${fileName}/entity/${fileName}.type.ts`,
-      "ttt"
-    );
-
-    fs.writeFileSync(
-      `./src/api/routes/route/${fileName}/${fileName}.route.ts`,
-      "test aj"
-    );
-
-    // if(err) reject(err);
-    resolve();
-  });
-});
-
-gulp.task("default", function () {
-  console.log("Hello from Gulp!");
-});
-
-gulp.task("createFile", function () {
-  const fileName = process.argv[4]; // Get the file name from the command-line arguments
-  fs.writeFileSync(`./${fileName}.txt`, "Hello World");
+gulp.task('generate', function () {
+  if (!!options.mongo)
+    return gulp.src('gulpfile.js/modules/product/**/*')
+      .pipe(rename(function (path) {
+        path.basename = path.basename.replace('product', options.module);
+      }))
+      .pipe(replace('productService', `${lcfucText}Service`))
+      .pipe(replace('product', lcText))
+      .pipe(replace('Product', ucText))
+      .pipe(prettier())
+      .pipe(gulp.dest(`./src/modules/${lcText}/`));
+  else
+    return gulp.src('gulpfile.js/modules/good/**/*')
+      .pipe(rename(function (path) {
+        path.basename = path.basename.replace('good', options.module);
+      }))
+      .pipe(replace('goodService', `${lcfucText}Service`))
+      .pipe(replace('good', lcText))
+      .pipe(replace('Good', ucText))
+      .pipe(prettier())
+      .pipe(gulp.dest(`./src/modules/${lcText}/`));
 });
