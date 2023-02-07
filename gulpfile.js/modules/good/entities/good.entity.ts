@@ -1,16 +1,17 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
-import { Table, Column, Index } from 'sequelize-typescript';
-import { Entity } from '../../../core/modules/database/entity';
+import { Table, Model, Column, DataType } from "sequelize-typescript";
+import sequlizeConnection from "../../../../config/database";
 
-@Table
-export class Good extends Entity<Good> {
-  @Index
-  @Column
-  @ApiProperty({
-    description: 'Good Name',
-    example: 'Good Demo',
+@Table({
+  timestamps: true,
+  tableName: "Goods",
+})
+export class Good extends Model {
+  @Column({
+    type: DataType.STRING,
+    comment: "Tony",
+    allowNull: false,
   })
-  @IsString()
-  name: string;
+  name!: string;
 }
+
+sequlizeConnection.addModels([Good]);

@@ -1,136 +1,44 @@
+import { Request, Response } from "express";
+import { v4 as uuidv4 } from "uuid";
+
+import { queryValidation } from "./../../../core/utils/validation";
+import { NotFoundError, ValidationError } from "./../../../core/utils/errors";
+import { Good } from "./entity/good.model";
+import { Job } from "../../../core/utils/job";
+import { GoodService } from "./good.service";
 import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Post,
-  Put,
-  Query,
-  Req,
-  Res,
-} from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiExtraModels,
-  ApiForbiddenResponse,
-  ApiInternalServerErrorResponse,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
-import { Request, Response } from 'express';
-import { Job, JobResponse } from '../../core/utils/job';
-import { Owner, OwnerDto } from '../../decorators/owner.decorator';
-import {
+  BadRequest,
   Created,
   ErrorResponse,
   NotFound,
   Result,
-} from '../../core/utils/responses';
-import { NotFoundError } from '../../core/utils/errors';
-import { Good } from './entities/good.entity';
-import { GoodService } from './good.service';
-import { CreateGoodDto } from './dto/create-good.dto';
-import { UpdateGoodDto } from './dto/update-good.dto';
-import { MsClientService } from '../../core/modules/ms-client/ms-client.service';
-import {
-  ResponseForbidden,
-  ResponseInternalServerError,
-} from '../../core/utils/definitions';
-import {
-  ApiQueryCountAll,
-  ApiQueryGetAll,
-  ApiQueryGetById,
-  ApiQueryGetOne,
-  MsListener,
-  ResponseCountAll,
-  ResponseCreated,
-  ResponseDeleted,
-  ResponseGetAll,
-  ResponseGetOne,
-  ResponseUpdated,
-} from '../../core/utils/decorators';
-import { pluralizeString, snakeCase } from '../../core/utils/helpers';
+} from "../../../core/utils/response";
 
-const entity = snakeCase(Good.name);
+const goodService = new GoodService(Good);
 
-@ApiTags(entity)
-@ApiBearerAuth()
-@ApiForbiddenResponse(ResponseForbidden)
-@ApiInternalServerErrorResponse(ResponseInternalServerError)
-@ApiExtraModels(Good)
-@Controller(entity)
 export class GoodController {
-  constructor(
-    private readonly goodService: GoodService,
-    private client: MsClientService,
-  ) {}
+  // constructor(private goodService = new GoodService(Good)){
 
+  // }
   /**
-   * Queue listener for Good
+   * Create Good
    */
-  @MsListener(`controller.${entity}`)
-  async execute(job: Job): Promise<void> {
-    job = new Job(job);
-    await this.goodService[job.action]<JobResponse>(job);
-    await this.client.jobDone(job);
-  }
-  /**
-   * Create a new entity
-   */
-  @Post()
-  @ApiOperation({ summary: `Create new ${entity}` })
-  @ResponseCreated(Good)
-  async create(
-    @Req() req: Request,
-    @Res() res: Response,
-    @Owner() owner: OwnerDto,
-    @Body() createGoodDto: CreateGoodDto,
-  ) {
-    const { error, data } = await this.goodService.create(
+  async create(req: Request, res: Response) {
+    const { data, error } = await goodService.create(
       new Job({
-        owner,
-        action: 'create',
-        body: createGoodDto,
-      }),
+        action: "create",
+        body: {
+          uid: uuidv4(),
+          ...req.body,
+        },
+      })
     );
 
     if (!!error) {
-      return ErrorResponse(res, {
-        error,
-        message: `${error.message || error}`,
-      });
-    }
-    return Created(res, { data: { [entity]: data }, message: 'Created' });
-  }
-
-  /**
-   * Update entity using id
-   */
-  @Put(':id')
-  @ApiOperation({ summary: `Update ${entity} using id` })
-  @ResponseUpdated(Good)
-  async update(
-    @Req() req: Request,
-    @Res() res: Response,
-    @Owner() owner: OwnerDto,
-    @Param('id') id: number,
-    @Body() updateGoodDto: UpdateGoodDto,
-  ) {
-    const { error, data } = await this.goodService.update(
-      new Job({
-        owner,
-        action: 'update',
-        id: +id,
-        body: updateGoodDto,
-      }),
-    );
-
-    if (!!error) {
-      if (error instanceof NotFoundError) {
-        return NotFound(res, {
+      if (error instanceof ValidationError) {
+        return BadRequest(res, {
           error,
-          message: `Record not found`,
+          message: error.message,
         });
       }
       return ErrorResponse(res, {
@@ -138,31 +46,21 @@ export class GoodController {
         message: `${error.message || error}`,
       });
     }
-    return Result(res, { data: { [entity]: data }, message: 'Updated' });
+    return Created(res, { data: { good: data }, message: "Created" });
   }
 
   /**
-   * Return all entities list
+   * Return all Goods list
    */
-  @Get()
-  @ApiOperation({ summary: `Get all ${pluralizeString(entity)}` })
-  @ApiQueryGetAll()
-  @ResponseGetAll(Good)
-  async findAll(
-    @Req() req: Request,
-    @Res() res: Response,
-    @Owner() owner: OwnerDto,
-    @Query() query: any,
-  ) {
-    const { error, data, offset, limit, count } =
-      await this.goodService.findAll(
-        new Job({
-          owner,
-          action: 'findAll',
-          options: { ...query },
-        }),
-      );
-
+  async getAll(req: Request, res: Response) {
+    const { data, count, limit, offset, error } = await goodService.findAll(
+      new Job({
+        action: "findAll",
+        options: {
+          ...queryValidation(req.query),
+        },
+      })
+    );
     if (!!error) {
       return ErrorResponse(res, {
         error,
@@ -170,32 +68,24 @@ export class GoodController {
       });
     }
     return Result(res, {
-      data: { [pluralizeString(entity)]: data, offset, limit, count },
-      message: 'Ok',
+      data: { good: data, count, limit, offset },
+      message: "Ok",
     });
   }
 
   /**
-   * Return count of entities
+   * Return Good Count
    */
-  @Get('count')
-  @ApiOperation({ summary: `Get count of ${pluralizeString(entity)}` })
-  @ApiQueryCountAll()
-  @ResponseCountAll()
-  async countAll(
-    @Req() req: Request,
-    @Res() res: Response,
-    @Owner() owner: OwnerDto,
-    @Query() query: any,
-  ) {
-    const { error, count } = await this.goodService.getCount(
+  async getCount(req: Request, res: Response) {
+    queryValidation(req.query);
+    const { data, count, limit, offset, error } = await goodService.getCount(
       new Job({
-        owner,
-        action: 'getCount',
-        options: { ...query },
-      }),
+        action: "getCount",
+        options: {
+          ...queryValidation(req.query),
+        },
+      })
     );
-
     if (!!error) {
       return ErrorResponse(res, {
         error,
@@ -203,37 +93,29 @@ export class GoodController {
       });
     }
     return Result(res, {
-      data: { count },
-      message: 'Ok',
+      data: { good: data, count, limit, offset },
+      message: "Ok",
     });
   }
 
   /**
-   * Find one entity
+   * Return Goods By Id
    */
-  @Get('find')
-  @ApiOperation({ summary: `Find one ${entity}` })
-  @ApiQueryGetOne()
-  @ResponseGetOne(Good)
-  async findOne(
-    @Req() req: Request,
-    @Res() res: Response,
-    @Owner() owner: OwnerDto,
-    @Query() query: any,
-  ) {
-    const { error, data } = await this.goodService.findOne(
+  async getById(req: Request, res: Response) {
+    const { data, error } = await goodService.findById(
       new Job({
-        owner,
-        action: 'findOne',
-        options: { ...query },
-      }),
+        action: "findById",
+        id: +req.params.id,
+        options: {
+          ...queryValidation(req.query),
+        },
+      })
     );
-
     if (!!error) {
       if (error instanceof NotFoundError) {
         return NotFound(res, {
           error,
-          message: `Record not found`,
+          message: `Record Not found`,
         });
       }
       return ErrorResponse(res, {
@@ -241,37 +123,29 @@ export class GoodController {
         message: `${error.message || error}`,
       });
     }
-    return Result(res, { data: { [entity]: data }, message: 'Ok' });
+    return Result(res, {
+      data: { good: data },
+      message: "Ok",
+    });
   }
 
   /**
-   * Find entity using id
+   * Return Good with parameter
    */
-  @Get(':id')
-  @ApiOperation({ summary: `Find ${entity} using id` })
-  @ApiQueryGetById()
-  @ResponseGetOne(Good)
-  async findById(
-    @Req() req: Request,
-    @Res() res: Response,
-    @Owner() owner: OwnerDto,
-    @Param('id') id: number,
-    @Query() query: any,
-  ) {
-    const { error, data } = await this.goodService.findById(
+  async getOne(req: Request, res: Response) {
+    const { data, error } = await goodService.findOne(
       new Job({
-        owner,
-        action: 'findById',
-        id: +id,
-        options: { ...query },
-      }),
+        action: "findOne",
+        options: {
+          ...queryValidation(req.query),
+        },
+      })
     );
-
     if (!!error) {
       if (error instanceof NotFoundError) {
         return NotFound(res, {
           error,
-          message: `Record not found`,
+          message: `Record Not found`,
         });
       }
       return ErrorResponse(res, {
@@ -279,34 +153,28 @@ export class GoodController {
         message: `${error.message || error}`,
       });
     }
-    return Result(res, { data: { [entity]: data }, message: 'Ok' });
+    return Result(res, {
+      data: { good: data },
+      message: "Ok",
+    });
   }
 
   /**
-   * Delete entity using id
+   * Update Good
    */
-  @Delete(':id')
-  @ApiOperation({ summary: `Delete ${entity} using id` })
-  @ResponseDeleted(Good)
-  async delete(
-    @Req() req: Request,
-    @Res() res: Response,
-    @Owner() owner: OwnerDto,
-    @Param('id') id: number,
-  ) {
-    const { error, data } = await this.goodService.delete(
+  async update(req: Request, res: Response) {
+    const { data, error } = await goodService.update(
       new Job({
-        owner,
-        action: 'delete',
-        id: +id,
-      }),
+        action: "update",
+        id: +req.params.id,
+        body: req.body,
+      })
     );
-
     if (!!error) {
       if (error instanceof NotFoundError) {
         return NotFound(res, {
           error,
-          message: `Record not found`,
+          message: `Record Not found`,
         });
       }
       return ErrorResponse(res, {
@@ -314,6 +182,40 @@ export class GoodController {
         message: `${error.message || error}`,
       });
     }
-    return Result(res, { data: { [entity]: data }, message: 'Deleted' });
+    return Result(res, {
+      data: { good: data },
+      message: "Updated",
+    });
+  }
+
+  /**
+   * Delete Good
+   */
+  async deleteOne(req: Request, res: Response) {
+    const { data, error } = await goodService.delete(
+      new Job({
+        action: "delete",
+        id: +req.params.id,
+        options: {
+          ...queryValidation(req.query),
+        },
+      })
+    );
+    if (!!error) {
+      if (error instanceof NotFoundError) {
+        return NotFound(res, {
+          error,
+          message: `Record Not found`,
+        });
+      }
+      return ErrorResponse(res, {
+        error,
+        message: `${error.message || error}`,
+      });
+    }
+    return Result(res, {
+      data: { good: data },
+      message: "Deleted",
+    });
   }
 }

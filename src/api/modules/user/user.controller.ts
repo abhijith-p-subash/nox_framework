@@ -13,11 +13,8 @@ import {
   NotFound,
   Result,
 } from "../../../core/utils/response";
-import { Get, Route, Post, Put, Delete } from "tsoa";
-import { EmailService } from "../../../core/modules/email/email.service";
 
 const userService = new UserService(User);
-const emailService = new EmailService();
 
 export class UserController {
   // constructor(private userService = new UserService(User)){
@@ -56,7 +53,6 @@ export class UserController {
    * Return all Users list
    */
   async getAll(req: Request, res: Response) {
-   
     const { data, count, limit, offset, error } = await userService.findAll(
       new Job({
         action: "findAll",
