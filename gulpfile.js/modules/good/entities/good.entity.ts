@@ -3,7 +3,7 @@ import sequlizeConnection from "../../../../config/database";
 
 @Table({
   timestamps: true,
-  tableName: "Goods",
+  tableName: "Good",
 })
 export class Good extends Model {
   @Column({
