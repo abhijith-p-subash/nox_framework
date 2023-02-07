@@ -1,136 +1,42 @@
+import { Request, Response } from "express";
+import { ValidationError } from "sequelize";
+import { NotFoundError } from "../../../core/utils/errors";
+import { Job, JobResponse } from "../../../core/utils/job";
 import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Post,
-  Put,
-  Query,
-  Req,
-  Res,
-} from '@nestjs/common';
-import {
-  ApiBearerAuth,
-  ApiExtraModels,
-  ApiForbiddenResponse,
-  ApiInternalServerErrorResponse,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
-import { Request, Response } from 'express';
-import { Job, JobResponse } from '../../core/utils/job';
-import { Owner, OwnerDto } from '../../decorators/owner.decorator';
-import {
+  BadRequest,
   Created,
   ErrorResponse,
   NotFound,
   Result,
-} from '../../core/utils/responses';
-import { NotFoundError } from '../../core/utils/errors';
-import { Product } from './entities/product.schema';
-import { ProductService } from './product.service';
-import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
-import { MsClientService } from '../../core/modules/ms-client/ms-client.service';
-import {
-  ResponseForbidden,
-  ResponseInternalServerError,
-} from '../../core/utils/definitions';
-import {
-  ApiQueryCountAll,
-  ApiQueryGetAll,
-  ApiQueryGetById,
-  ApiQueryGetOne,
-  MsListener,
-  ResponseCountAll,
-  ResponseCreated,
-  ResponseDeleted,
-  ResponseGetAll,
-  ResponseGetOne,
-  ResponseUpdated,
-} from '../../core/utils/decorators';
-import { pluralizeString, snakeCase } from '../../core/utils/helpers';
+} from "../../../core/utils/response";
+// import { Product, ProductGetAllResponse } from "./loginlog.type";
+import { queryValidation } from "../../../core/utils/validation";
+import { ProductModel, Product } from "./entity/login-log.model";
+import { ProductService } from "./login-log.service";
 
-const entity = snakeCase(Product.name);
 
-@ApiTags(entity)
-@ApiBearerAuth()
-@ApiForbiddenResponse(ResponseForbidden)
-@ApiInternalServerErrorResponse(ResponseInternalServerError)
-@ApiExtraModels(Product)
-@Controller(entity)
+const productService = new ProductService(ProductModel);
+
+
 export class ProductController {
-  constructor(
-    private readonly productService: ProductService,
-    private client: MsClientService,
-  ) {}
-
   /**
-   * Queue listener for Product
+   * Create product
    */
-  @MsListener(`controller.${entity}`)
-  async execute(job: Job): Promise<void> {
-    job = new Job(job);
-    await this.productService[job.action]<JobResponse>(job);
-    await this.client.jobDone(job);
-  }
-  /**
-   * Create a new entity
-   */
-  @Post()
-  @ApiOperation({ summary: `Create new ${entity}` })
-  @ResponseCreated(Product)
-  async create(
-    @Req() req: Request,
-    @Res() res: Response,
-    @Owner() owner: OwnerDto,
-    @Body() createProductDto: CreateProductDto,
-  ) {
-    const { error, data } = await this.productService.create(
+  async create(req: Request, res: Response) {
+    const { data, error } = await productService.create(
       new Job({
-        owner,
-        action: 'create',
-        body: createProductDto,
-      }),
+        action: "create",
+        body: {
+          ...req.body,
+        },
+      })
     );
 
     if (!!error) {
-      return ErrorResponse(res, {
-        error,
-        message: `${error.message || error}`,
-      });
-    }
-    return Created(res, { data: { [entity]: data }, message: 'Created' });
-  }
-
-  /**
-   * Update entity using id
-   */
-  @Put(':id')
-  @ApiOperation({ summary: `Update ${entity} using id` })
-  @ResponseUpdated(Product)
-  async update(
-    @Req() req: Request,
-    @Res() res: Response,
-    @Owner() owner: OwnerDto,
-    @Param('id') id: string,
-    @Body() updateProductDto: UpdateProductDto,
-  ) {
-    const { error, data } = await this.productService.update(
-      new Job({
-        owner,
-        action: 'update',
-        id,
-        body: updateProductDto,
-      }),
-    );
-
-    if (!!error) {
-      if (error instanceof NotFoundError) {
-        return NotFound(res, {
+      if (error instanceof ValidationError) {
+        return BadRequest(res, {
           error,
-          message: `Record not found`,
+          message: error.message,
         });
       }
       return ErrorResponse(res, {
@@ -138,31 +44,48 @@ export class ProductController {
         message: `${error.message || error}`,
       });
     }
-    return Result(res, { data: { [entity]: data }, message: 'Updated' });
+    return Created(res, { data: { product: data }, message: "Created" });
   }
 
   /**
-   * Return all entities list
+   * Return all products list
    */
-  @Get()
-  @ApiOperation({ summary: `Get all ${pluralizeString(entity)}` })
-  @ApiQueryGetAll()
-  @ResponseGetAll(Product)
-  async findAll(
-    @Req() req: Request,
-    @Res() res: Response,
-    @Owner() owner: OwnerDto,
-    @Query() query: any,
-  ) {
-    const { error, data, offset, limit, count } =
-      await this.productService.findAll(
+  async getAll(req: Request | any, res: Response): Promise<any> {
+    queryValidation(req.query);
+    const { data, count, limit, offset, error } = await productService.findAll(
+      new Job({
+        action: "findAll",
+        options: {
+          ...queryValidation(req.query),
+        },
+      })
+    );
+    if (!!error) {
+      return ErrorResponse(res, {
+        error,
+        message: `${error.message || error}`,
+      });
+    }
+    return Result(res, {
+      data: { products: data, count, limit, offset },
+      message: "Ok",
+    });
+  }
+
+  /**
+   * Return product Count
+   */
+  async getCount(req: Request, res: Response) {
+    queryValidation(req.query);
+    const { data, count, limit, offset, error } =
+      await productService.getCount(
         new Job({
-          owner,
-          action: 'findAll',
-          options: { ...query },
-        }),
+          action: "getCount",
+          options: {
+            ...queryValidation(req.query),
+          },
+        })
       );
-
     if (!!error) {
       return ErrorResponse(res, {
         error,
@@ -170,70 +93,59 @@ export class ProductController {
       });
     }
     return Result(res, {
-      data: { [pluralizeString(entity)]: data, offset, limit, count },
-      message: 'Ok',
+      data: { product: data, count, limit, offset },
+      message: "Ok",
     });
   }
 
   /**
-   * Return count of entities
+   * Return products By Id
    */
-  @Get('count')
-  @ApiOperation({ summary: `Get count of ${pluralizeString(entity)}` })
-  @ApiQueryCountAll()
-  @ResponseCountAll()
-  async countAll(
-    @Req() req: Request,
-    @Res() res: Response,
-    @Owner() owner: OwnerDto,
-    @Query() query: any,
-  ) {
-    const { error, count } = await this.productService.getCount(
+  async getById(req: Request, res: Response) {
+    const { data, error } = await productService.findById(
       new Job({
-        owner,
-        action: 'getCount',
-        options: { ...query },
-      }),
+        action: "findById",
+        id: req.params.id,
+        options: {
+          ...queryValidation(req.query),
+        },
+      })
     );
-
     if (!!error) {
+      if (error instanceof NotFoundError) {
+        return NotFound(res, {
+          error,
+          message: `Record Not found`,
+        });
+      }
       return ErrorResponse(res, {
         error,
         message: `${error.message || error}`,
       });
     }
     return Result(res, {
-      data: { count },
-      message: 'Ok',
+      data: { product: data },
+      message: "Ok",
     });
   }
 
   /**
-   * Find one entity
+   * Return product with parameter
    */
-  @Get('find')
-  @ApiOperation({ summary: `Find one ${entity}` })
-  @ApiQueryGetOne()
-  @ResponseGetOne(Product)
-  async findOne(
-    @Req() req: Request,
-    @Res() res: Response,
-    @Owner() owner: OwnerDto,
-    @Query() query: any,
-  ) {
-    const { error, data } = await this.productService.findOne(
+  async getOne(req: Request, res: Response) {
+    const { data, error } = await productService.findOne(
       new Job({
-        owner,
-        action: 'findOne',
-        options: { ...query },
-      }),
+        action: "findOne",
+        options: {
+          ...queryValidation(req.query),
+        },
+      })
     );
-
     if (!!error) {
       if (error instanceof NotFoundError) {
         return NotFound(res, {
           error,
-          message: `Record not found`,
+          message: `Record Not found`,
         });
       }
       return ErrorResponse(res, {
@@ -241,37 +153,28 @@ export class ProductController {
         message: `${error.message || error}`,
       });
     }
-    return Result(res, { data: { [entity]: data }, message: 'Ok' });
+    return Result(res, {
+      data: { product: data },
+      message: "Ok",
+    });
   }
 
   /**
-   * Find entity using id
+   * Update product
    */
-  @Get(':id')
-  @ApiOperation({ summary: `Find ${entity} using id` })
-  @ApiQueryGetById()
-  @ResponseGetOne(Product)
-  async findById(
-    @Req() req: Request,
-    @Res() res: Response,
-    @Owner() owner: OwnerDto,
-    @Param('id') id: string,
-    @Query() query: any,
-  ) {
-    const { error, data } = await this.productService.findById(
+  async update(req: Request, res: Response) {
+    const { data, error } = await productService.update(
       new Job({
-        owner,
-        action: 'findById',
-        id,
-        options: { ...query },
-      }),
+        action: "update",
+        id: req.params.id,
+        body: req.body,
+      })
     );
-
     if (!!error) {
       if (error instanceof NotFoundError) {
         return NotFound(res, {
           error,
-          message: `Record not found`,
+          message: `Record Not found`,
         });
       }
       return ErrorResponse(res, {
@@ -279,34 +182,30 @@ export class ProductController {
         message: `${error.message || error}`,
       });
     }
-    return Result(res, { data: { [entity]: data }, message: 'Ok' });
+    return Result(res, {
+      data: { product: data },
+      message: "Updated",
+    });
   }
 
   /**
-   * Delete entity using id
+   * Delete product
    */
-  @Delete(':id')
-  @ApiOperation({ summary: `Delete ${entity} using id` })
-  @ResponseDeleted(Product)
-  async delete(
-    @Req() req: Request,
-    @Res() res: Response,
-    @Owner() owner: OwnerDto,
-    @Param('id') id: string,
-  ) {
-    const { error, data } = await this.productService.delete(
+  async deleteOne(req: Request, res: Response) {
+    const { data, error } = await productService.delete(
       new Job({
-        owner,
-        action: 'delete',
-        id,
-      }),
+        action: "delete",
+        id: req.params.id,
+        options: {
+          ...queryValidation(req.query),
+        },
+      })
     );
-
     if (!!error) {
       if (error instanceof NotFoundError) {
         return NotFound(res, {
           error,
-          message: `Record not found`,
+          message: `Record Not found`,
         });
       }
       return ErrorResponse(res, {
@@ -314,6 +213,9 @@ export class ProductController {
         message: `${error.message || error}`,
       });
     }
-    return Result(res, { data: { [entity]: data }, message: 'Deleted' });
+    return Result(res, {
+      data: { product: data },
+      message: "Deleted",
+    });
   }
 }
