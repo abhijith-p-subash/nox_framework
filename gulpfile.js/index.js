@@ -1,8 +1,8 @@
 const gulp = require("gulp");
 const rename = require("gulp-rename");
 const replace = require("gulp-replace");
-const append = require('gulp-append');
-const insert = require('gulp-insert');
+const append = require("gulp-append");
+const insert = require("gulp-insert");
 const prettier = require("gulp-prettier");
 
 const options = {};
@@ -31,24 +31,23 @@ const ucText = lcText
   .join("");
 const lcfucText = ucText.charAt(0).toLowerCase() + ucText.slice(1);
 
-gulp.task("generate", function () {
+gulp.task("new", function () {
   if (!!options.mongo) {
-    return gulp
-      .src("gulpfile.js/modules/product/**/*")
-      .pipe(
-        rename(function (path) {
-          path.basename = path.basename.replace("product", options.module);
-        })
-      )
-      .pipe(replace("productService", `${lcfucText}Service`))
-      .pipe(replace("product", lcText))
-      .pipe(replace("Product", ucText))
-      .pipe(prettier())
-      .pipe(gulp.dest(`./src/api/modules/${lcText}/`));
-  } else if (!!options.route) {
-    const imprt = `import ${lcText}Router from "./route/${lcText}.route";`
+    const imprt = `import ${lcText}Router from "./route/${lcText}.route";`;
     const route = `routes.use("/${lcText}",passport.authenticate("jwt", { session: false }),${lcText}Router);`;
     return (
+      gulp
+        .src("gulpfile.js/modules/product/**/*")
+        .pipe(
+          rename(function (path) {
+            path.basename = path.basename.replace("product", options.module);
+          })
+        )
+        .pipe(replace("productService", `${lcfucText}Service`))
+        .pipe(replace("product", lcText))
+        .pipe(replace("Product", ucText))
+        .pipe(prettier())
+        .pipe(gulp.dest(`./src/api/modules/${lcText}/`)),
       gulp
         .src("gulpfile.js/modules/root.route.ts")
         .pipe(
@@ -69,17 +68,39 @@ gulp.task("generate", function () {
         .pipe(gulp.dest("./src/api/routes"))
     );
   } else {
-    return gulp
-      .src("gulpfile.js/modules/good/**/*")
-      .pipe(
-        rename(function (path) {
-          path.basename = path.basename.replace("good", options.module);
-        })
-      )
-      .pipe(replace("goodService", `${lcfucText}Service`))
-      .pipe(replace("good", lcText))
-      .pipe(replace("Good", ucText))
-      .pipe(prettier())
-      .pipe(gulp.dest(`./src/api/modules/${lcText}/`));
+    const imprt = `import ${lcText}Router from "./route/${lcText}.route";`;
+    const route = `routes.use("/${lcText}",passport.authenticate("jwt", { session: false }),${lcText}Router);`;
+    return (
+      gulp
+        .src("gulpfile.js/modules/good/**/*")
+        .pipe(
+          rename(function (path) {
+            path.basename = path.basename.replace("good", options.module);
+          })
+        )
+        .pipe(replace("goodService", `${lcfucText}Service`))
+        .pipe(replace("good", lcText))
+        .pipe(replace("Good", ucText))
+        .pipe(prettier())
+        .pipe(gulp.dest(`./src/api/modules/${lcText}/`)),
+      gulp
+        .src("gulpfile.js/modules/root.route.ts")
+        .pipe(
+          rename(function (path) {
+            path.basename = path.basename.replace("root", options.module);
+          })
+        )
+        .pipe(replace("root.route", `${lcfucText}.route`))
+        .pipe(replace("root", lcText))
+        .pipe(replace("Root", ucText))
+        .pipe(prettier())
+        .pipe(gulp.dest(`./src/api/routes/route`)),
+      gulp
+        .src("./src/api/routes/index.ts")
+        .pipe(insert.prepend(`${imprt}`))
+        .pipe(insert.append(`${route}`))
+        .pipe(prettier())
+        .pipe(gulp.dest("./src/api/routes"))
+    );
   }
 });
