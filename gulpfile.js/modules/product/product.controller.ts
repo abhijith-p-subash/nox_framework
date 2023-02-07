@@ -9,10 +9,9 @@ import {
   NotFound,
   Result,
 } from "../../../core/utils/response";
-// import { Product, ProductGetAllResponse } from "./loginlog.type";
 import { queryValidation } from "../../../core/utils/validation";
-import { ProductModel, Product } from "./entity/login-log.model";
-import { ProductService } from "./login-log.service";
+import { ProductModel, Product } from "./entity/product.model";
+import { ProductService } from "./product.service";
 
 
 const productService = new ProductService(ProductModel);
