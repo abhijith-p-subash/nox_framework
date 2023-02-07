@@ -5,4 +5,4 @@ export class Product {
   public name?: string;
 }
 
-export const LoginLogModel = getModelForClass(Product);
+export const ProductModel = getModelForClass(Product);
