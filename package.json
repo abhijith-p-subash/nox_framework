@@ -2,7 +2,7 @@
   "name": "nox_framework",
   "version": "1.0.0",
   "description": "nox_framework (\"Node\", \"Express\" framework)",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "build": "npx tsc",
     "start": "node dist/index.js",
