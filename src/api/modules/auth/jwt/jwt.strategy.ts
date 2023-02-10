@@ -10,7 +10,7 @@ const userService = new UserService(User);
 
 const opts = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: `${process.env.JWT_SECRET}`,
+  secretOrKey: `${process.env.ACCESS_TOKEN_SECRET}`,
 };
 
 export const jwtAuth = new JwtStrategy(opts, async (jwt_payload, done) => {

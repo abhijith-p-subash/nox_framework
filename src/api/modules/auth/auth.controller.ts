@@ -1,7 +1,10 @@
 import { Request, Response } from "express";
 import { EmailService } from "../../../core/modules/email/email.service";
+import { ValidationError } from "../../../core/utils/errors";
 import { Job } from "../../../core/utils/job";
 import {
+  BadRequest,
+  Created,
   ErrorResponse,
   Result,
   Unauthorized,
@@ -13,11 +16,42 @@ const authService = new AuthService();
 const jwtService = new JWTService();
 
 export class AuthController {
+  async signup(req: Request, res: Response) {
+    console.log(req.body);
+    const { data, error, verificationToken, message } =
+      await authService.registerUser(
+        new Job({
+          body: {
+            user: req.body,
+            httpData: {
+              protocol: req.protocol,
+              host: req.headers.host,
+              // toEmail: req.body.email
+            },
+          },
+        })
+      );
+
+    if (!!error) {
+      if (error instanceof ValidationError) {
+        return BadRequest(res, {
+          error,
+          message: error.message,
+        });
+      }
+      return ErrorResponse(res, {
+        error,
+        message: `${error.message || error}`,
+      });
+    }
+    return Created(res, {
+      data: { user: data, verificationToken },
+      message: "Created and Verification Email send",
+    });
+  }
+
   async login(req: Request, res: Response) {
     let user: { id: number } | any = req.user;
-    console.log(req.body);
-    console.log(req.user);
-
     const { data, error } = await authService.createUserSession(
       new Job({
         id: user.id,
@@ -31,9 +65,6 @@ export class AuthController {
       });
     }
     return Result(res, { data, message: "Login success" });
-  }
-  async signup() {
-    return await jwtService.createToken(1, "1h");
   }
 
   async sendVerificationEmail(req: Request, res: Response) {

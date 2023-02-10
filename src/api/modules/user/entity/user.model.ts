@@ -9,7 +9,6 @@ import {
 import sequlizeConnection from "../../../../config/database";
 import { generateHash, uuid } from "../../../../core/utils/helpers";
 
-
 @Table({
   timestamps: true,
   tableName: "users",
@@ -92,9 +91,14 @@ export class User extends Model {
 
   @Column({
     type: DataType.BOOLEAN,
-    allowNull: false,
+    allowNull: true,
   })
-  active!: true;
+  active!: boolean;
+  @Column({
+    type: DataType.BOOLEAN,
+    allowNull: true,
+  })
+  verified!: boolean;
   @Column({
     type: DataType.STRING || DataType.NUMBER,
     allowNull: true,
@@ -127,6 +131,8 @@ export class User extends Model {
   @BeforeCreate
   static createUID(instance: User) {
     instance.uid = uuid();
+    instance.verified = false;
+    instance.active = true;
   }
 
   @BeforeCreate

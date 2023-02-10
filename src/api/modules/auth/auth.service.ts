@@ -6,6 +6,7 @@ import { LoginLogService } from "../login-log/login-log.service";
 import { User } from "../user/entity/user.model";
 import { UserService } from "../user/user.service";
 import { JWTService } from "./jwt/jwt.service";
+import { v4 as uuidv4 } from "uuid";
 
 const userService = new UserService(User);
 const loginLogService = new LoginLogService(LoginLogModel);
@@ -15,11 +16,54 @@ const emailService = new EmailService();
 export class AuthService {
   async createSession() {}
 
-  async createUserSession(job:Job) {
-    console.log(">>>JOB");
-    
+  async registerUser(job: Job) {
     console.log(job);
-    
+    const { data, error } = await userService.create(
+      new Job({
+        action: "create",
+        body: {
+          uid: uuidv4(),
+          ...job.body?.user,
+        },
+      })
+    );
+    if (!!error) {
+      return { error, message: error.message };
+    }
+    console.log(data);
+
+    const {
+      data: sndEmailRes,
+      message,
+      error: sndEmailErr,
+      status,
+      verificationToken,
+    } = await this.sendVerificationEmail(
+      new Job({
+        id: data.id,
+        body: {
+          protocol: job.body?.httpData.protocol,
+          host: job.body?.httpData.host,
+          toEmail: data.email,
+        },
+      })
+    );
+
+    if (!!sndEmailErr) {
+      return {
+        error: sndEmailErr,
+        message: "Verification Email failed to Send",
+      };
+    }
+
+    return { data, verificationToken, status, message };
+  }
+
+  async createUserSession(job: Job) {
+    console.log(">>>JOB");
+
+    console.log(job);
+
     const id: { id: number } | any = job.id;
     const jobBody = (job as { body: any }).body;
     const { data, error } = await userService.findById(
@@ -37,16 +81,19 @@ export class AuthService {
       const token = await jwtService.createToken(id, "1h");
       const refreshToken = await jwtService.createRefreshToken(id);
 
-      const loginLogs = await loginLogService.create(new Job({
-        action: "create",
-        body: {
-          name: jobBody.full_name,
-          user_id: +id
-        }
-      }))
+      const loginLogs = await loginLogService.create(
+        new Job({
+          action: "create",
+          body: {
+            name: jobBody.full_name,
+            user_id: +id,
+          },
+        })
+      );
 
-      if (loginLogs.error) return {error: true, message: "Failed to register Login Logs"}
-      
+      if (loginLogs.error)
+        return { error: true, message: "Failed to register Login Logs" };
+
       return {
         error: false,
         data: { token, refreshToken, user: data },
@@ -72,7 +119,7 @@ export class AuthService {
             toEmail: job.body?.toEmail,
           },
           body: {
-            subject: "NEW EMAIL TESTING SUBJECT",
+            subject: "User Verification [NOX_Framework v1.0.0]",
             OTP: OTP,
             link: verificationLink,
             toEmail: job.body?.toEmail,
@@ -105,7 +152,7 @@ export class AuthService {
           action: "update",
           id: tokenVerifi.userId,
           body: {
-            active: true,
+            verified: true,
           },
         })
       );
