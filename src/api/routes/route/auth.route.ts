@@ -15,6 +15,8 @@ authRouter.post(
   authController.login
 );
 
+authRouter.post('/logout', authController.logout)
+
 authRouter.post("/send-verification-email/:id", authController.sendVerificationEmail);
 authRouter.get("/email-verification/:token", authController.emailVerification)
 

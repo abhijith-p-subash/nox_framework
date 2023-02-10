@@ -114,8 +114,11 @@ export class AuthController {
   }
 
   async logout(req: Request, res: Response) {
-    // req.logOut();
+    res.clearCookie('access_token');
     res.redirect("/");
+    return Result(res, {
+      message: "Log Out",
+    });
   }
 
   async testSecurity(req: Request, res: Response) {
