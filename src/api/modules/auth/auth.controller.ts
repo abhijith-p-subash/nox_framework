@@ -17,7 +17,6 @@ const jwtService = new JWTService();
 
 export class AuthController {
   async signup(req: Request, res: Response) {
-    console.log(req.body);
     const { data, error, verificationToken, message } =
       await authService.registerUser(
         new Job({

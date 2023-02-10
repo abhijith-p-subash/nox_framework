@@ -17,7 +17,6 @@ export class AuthService {
   async createSession() {}
 
   async registerUser(job: Job) {
-    console.log(job);
     const { data, error } = await userService.create(
       new Job({
         action: "create",
@@ -30,8 +29,6 @@ export class AuthService {
     if (!!error) {
       return { error, message: error.message };
     }
-    console.log(data);
-
     const {
       data: sndEmailRes,
       message,
@@ -60,10 +57,6 @@ export class AuthService {
   }
 
   async createUserSession(job: Job) {
-    console.log(">>>JOB");
-
-    console.log(job);
-
     const id: { id: number } | any = job.id;
     const jobBody = (job as { body: any }).body;
     const { data, error } = await userService.findById(

@@ -19,18 +19,12 @@ export class EmailService {
 
   async sendMail(job: Job) {
     try {
-      console.log(job);
-
       let info = await this.transporter.sendMail({
         from: process.env.EMAIL_HOST,
         to: job.body?.toEmail,
         subject: job.body?.subject,
         html: job.body?.htmlBody,
       });
-
-      console.log("Message sent: %s", info.messageId);
-
-      console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
       return {
         data: info,
         message: "Email Send",
