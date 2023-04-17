@@ -17,22 +17,20 @@ import passport from "passport";
 import { jwtAuth } from "./api/modules/auth/jwt/jwt.strategy";
 import { localAuth } from "./api/modules/auth/local/local.strategy";
 
-
-
 dotenv.config();
 
 const app: Express = express();
-const port = process.env.PORT;
+const port = process.env.PORT || 3000;
 
 app.use(helmet());
 app.use(cors());
 app.use(express.json());
 app.use(morgan("tiny"));
 app.use(bodyParser.urlencoded({ extended: false }));
-app.set('view engine', 'ejs');
-app.use(express.static('public'))
+app.set("view engine", "ejs");
+app.use(express.static("public"));
 passport.use(jwtAuth);
-passport.use(localAuth)
+passport.use(localAuth);
 app.use(passport.initialize());
 //app.use(passport.session());
 
@@ -49,7 +47,10 @@ app.use(
 );
 
 app.get("/", (req: Request, res: Response) => {
-  res.render('home', {message:"Welcome to NOX_Framework v0.1.1", version: process.env.VERSION});
+  res.render("home", {
+    message: "Welcome to NOX_Framework v0.1.1",
+    version: process.env.VERSION,
+  });
 });
 
 const start = async (): Promise<void> => {

@@ -1,5 +1,5 @@
 {
-  "name": "nox_framework",
+  "name": "noex_framework",
   "version": "1.0.0",
   "description": "nox_framework (\"Node\", \"Express\" framework)",
   "main": "dist/index.js",
