@@ -2,11 +2,8 @@ import express, { Express, Request, Response } from "express";
 import bodyParser from "body-parser";
 import * as dotenv from "dotenv";
 import morgan from "morgan";
-import swaggerUi from "swagger-ui-express";
 import cors from "cors";
 import helmet from "helmet";
-
-const swaggerFile = require("../swagger_output.json");
 
 import routes from "./api/routes";
 
@@ -35,16 +32,6 @@ app.use(passport.initialize());
 //app.use(passport.session());
 
 app.use(routes);
-
-app.use(
-  "/api-docs",
-  swaggerUi.serve,
-  swaggerUi.setup(undefined, {
-    swaggerOptions: {
-      url: "/swagger.json",
-    },
-  })
-);
 
 app.get("/", (req: Request, res: Response) => {
   res.render("home", {
