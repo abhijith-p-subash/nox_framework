@@ -1,3 +1,4 @@
+import roleRouter from "./route/role.route";
 import loginLogRouter from "./route/login-log.route";
 import userRouter from "./route/user.route";
 import authRouter from "./route/auth.route";
@@ -18,4 +19,9 @@ routes.use(
   "/login-logs",
   passport.authenticate("jwt", { session: false }),
   loginLogRouter
+);
+routes.use(
+  "/role",
+  passport.authenticate("jwt", { session: false }),
+  roleRouter
 );
