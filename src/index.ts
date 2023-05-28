@@ -8,7 +8,6 @@ import helmet from "helmet";
 import routes from "./api/routes";
 
 import sequelizeConnection from "./config/database";
-import mongoConnection from "./config/mongo";
 import redisClient from "./config/redis";
 import passport from "passport";
 import { jwtAuth } from "./api/modules/auth/jwt/jwt.strategy";
@@ -45,9 +44,6 @@ const start = async (): Promise<void> => {
     await sequelizeConnection
       .sync()
       .then(() => console.log("\x1b[32m", "mySql Connected"));
-    await mongoConnection().then(() =>
-      console.log("\x1b[32m", "MogoDB Connected")
-    );
     await redisClient.connect().then(() => {
       console.log("\x1b[32m", "Redis Client Connected");
     });
