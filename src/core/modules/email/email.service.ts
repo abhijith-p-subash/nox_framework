@@ -11,7 +11,7 @@ export class EmailService {
     secure: false,
     auth: {
       // user: "abhijithpsubash110@gmail.com",
-      // pass: "rahwaqxxoxnyfmkg"
+      // pass: "qtpquqrvmztxojmw",
       user: process.env.EMAIL_USERNAME,
       pass: process.env.EMAIL_PASSWORD,
     },
